@@ -93,7 +93,7 @@ select.in{padding:5px 4px;color:#0b2fa8}
 <header class="app-header">
  <div class="hrow"><div class="logo">사업성 검토 · 원가분석<small>자동차/부품 신규사업 의사결정 도구 (초안 v0.1)</small></div>
   <input id="pn" class="pn in" type="text" data-path="meta.name" data-kind="text" placeholder="프로젝트명">
-  <div class="acts"><select id="preset" class="pre"><option value="staria">예시: 스타리아 EV 어린이차</option><option value="pv7">예시: PV7 어린이차 (복사본)</option><option value="part">예시: 신규 부품 단품</option><option value="blank">빈 템플릿</option></select><button class="btn" id="btnNew">예시 불러오기</button><button class="btn" id="btnExport">💾 저장</button><button class="btn" id="btnImport">📂 불러오기</button><button class="btn pri" id="btnPrint">🖨 인쇄</button></div></div>
+  <div class="acts"><select id="preset" class="pre"><option value="staria">예시: 스타리아 EV 어린이차</option><option value="pv7">예시: PV7 어린이차 (복사본)</option><option value="part">예시: 신규 부품 단품</option><option value="blank">빈 템플릿</option></select><button class="btn" id="btnNew">예시 불러오기</button><button class="btn" id="btnExport">💾 저장</button><button class="btn" id="btnLink">🔗 공유 링크</button><button class="btn" id="btnImport">📂 불러오기</button><button class="btn pri" id="btnPrint">🖨 인쇄</button></div></div>
  <div class="krow" id="topKpi"></div><nav class="tabs" id="nav"></nav>
 </header>
 <main id="view"></main>
@@ -327,10 +327,10 @@ const getP=(o,p)=>p.split('.').reduce((a,k)=>a==null?a:a[k],o);
 const setP=(o,p,v)=>{const ks=p.split('.');const l=ks.pop();const t=ks.reduce((a,k)=>a[k],o);t[l]=v};
 
 /* ===== 상태 ===== */
-let S,R,TAB='dash',saveT;
+let S,R,TAB='dash',saveT,SHARED=false;
 const KEY='autoCostFeas_v1';
 function load(){try{const j=localStorage.getItem(KEY);if(j){const o=JSON.parse(j);if(o&&o.base&&o.bom)return o}}catch(e){}return null}
-function persist(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}},400)}
+function persist(){if(SHARED)return;clearTimeout(saveT);saveT=setTimeout(()=>{if(SHARED)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}},400)}
 S=load()||presetStaria(); if(!S.scen)S.scen=defaultScen(); if(!S.meta.unit)S.meta.unit='대';
 
 /* ===== 표 정의 ===== */
@@ -584,6 +584,7 @@ document.addEventListener('click',e=>{const t=e.target;
  const dsc=t.closest('[data-delsc]');if(dsc){S.scen.splice(+dsc.dataset.delsc,1);view(1);return}
  if(t.closest('#btnPrint')||t.closest('#btnPrint2'))doPrint();
  if(t.closest('#btnExport'))exportModal();
+ if(t.closest('#btnLink'))linkModal();if(t.closest('#mLinkCopy'))copyEl('#mLink','#mMsg');if(t.closest('#btnKeep'))keepShared();
  if(t.closest('#btnImport'))importModal();
  if(t.closest('#btnNew')){if(confirm0('현재 입력 내용이 사라지고 선택한 예시로 바뀝니다.'))loadPreset($('#preset').value)}
  if(t.closest('.mclose')||t.classList.contains('mback'))closeModal();
@@ -600,13 +601,32 @@ function buildNav(){const hideTeam=/github\.io$/.test(location.hostname);$('#nav
 function doPrint(){try{window.print()}catch(e){}openModal('인쇄 안내',`<p>인쇄 창이 열리지 않았다면 <b>Ctrl+P</b>(Mac은 ⌘P)를 누르세요. 현재 보고 계신 화면이 인쇄됩니다.</p><p>경영자 보고용으로는 상단 탭 <b>"🖨 보고서·인쇄"</b>에서 인쇄하는 것이 가장 깔끔합니다 (A4 세로, 2쪽 내외). 대상 프린터에서 <b>"PDF로 저장"</b>을 고르면 PDF 파일이 됩니다.</p>`)}
 function openModal(t,h){$('#modal').innerHTML=`<div class="mback"><div class="mbox"><div class="mh"><b>${t}</b><button class="ib mclose">✕</button></div><div class="mb">${h}</div></div></div>`;$('#modal').style.display='block'}
 function closeModal(){$('#modal').style.display='none';$('#modal').innerHTML=''}
-function exportModal(){openModal('저장 (내보내기)',`<p>아래 내용을 복사해 메모장 등에 저장해 두면, 나중에 "불러오기"로 그대로 복원됩니다. (이 화면은 브라우저에도 자동 저장되지만, 다른 PC/기기로 옮기려면 이 방법을 쓰세요.)</p><textarea id="mTa" class="ta" readonly>${esc(JSON.stringify(S))}</textarea><div class="btns"><button class="btn pri" id="mCopy">복사</button><button class="btn" id="mDl">파일로 저장(.json)</button><span id="mMsg" class="sub"></span></div>`)}
+function exportModal(){openModal('저장 (내보내기)',`<p><b>파일로 저장</b>을 누르면 .json 파일이 내려받아지고, 팀원은 "📂 불러오기"에서 그 파일을 선택하면 같은 화면이 열립니다. 파일 전달이 어려우면 아래 텍스트를 복사해 보내도 됩니다.</p><p>아래 내용을 복사해 메모장 등에 저장해 두면, 나중에 "불러오기"로 그대로 복원됩니다. (이 화면은 브라우저에도 자동 저장되지만, 다른 PC/기기로 옮기려면 이 방법을 쓰세요.)</p><textarea id="mTa" class="ta" readonly>${esc(JSON.stringify(S))}</textarea><div class="btns"><button class="btn pri" id="mCopy">복사</button><button class="btn" id="mDl">파일로 저장(.json)</button><span id="mMsg" class="sub"></span></div>`)}
 function importModal(){openModal('불러오기',`<p>저장해 둔 내용을 붙여넣거나 파일을 선택하세요.</p><textarea id="mTa" class="ta" placeholder="여기에 붙여넣기"></textarea><div class="btns"><input type="file" id="mFile" accept=".json,application/json"><button class="btn pri" id="mApply">적용</button><span id="mMsg" class="sub"></span></div>`);$('#mFile').onchange=ev=>{const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('#mTa').value=r.result};r.readAsText(f)}}
+function copyEl(sel,msg){const ta=$(sel);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}try{navigator.clipboard.writeText(ta.value);ok=true}catch(e){}$(msg).textContent=ok?'복사되었습니다':'선택된 내용을 Ctrl+C로 복사하세요'}
 function copyJSON(){const ta=$('#mTa');ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}try{navigator.clipboard.writeText(ta.value);ok=true}catch(e){}$('#mMsg').textContent=ok?'복사되었습니다':'선택된 내용을 Ctrl+C로 복사하세요'}
 async function dlJSON(){try{if(window.claude&&claude.use){const d=await claude.use('downloads');if(d){await d.save({filename:(S.meta.name||'project')+'.json',data:$('#mTa').value});$('#mMsg').textContent='저장 요청을 보냈습니다.';return}}}catch(e){if(e&&e.code==='declined'){return}}try{const b=new Blob([$('#mTa').value],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(S.meta.name||'project')+'.json';document.body.appendChild(a);a.click();a.remove();$('#mMsg').textContent='파일 저장을 시도했습니다. 안 되면 "복사"를 이용하세요.'}catch(e){$('#mMsg').textContent='이 환경에서는 파일 저장이 막혀 있습니다. "복사"를 이용하세요.'}}
 function applyImport(){try{const o=JSON.parse($('#mTa').value);if(!o.base||!o.bom)throw 0;S=o;if(!S.scen)S.scen=defaultScen();closeModal();TAB='dash';buildNav();view()}catch(e){$('#mMsg').textContent='형식이 올바르지 않습니다.'}}
 /* ===== 시작 ===== */
-function init(){tipEl=$('#tip');buildNav();view();teamInit()}
+
+/* ===== 공유 링크 (서버 없이 주소에 데이터 포함) ===== */
+const b64u=u8=>{let s='';u8.forEach(b=>s+=String.fromCharCode(b));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
+const unb64u=t=>{t=t.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';const s=atob(t),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u};
+async function packState(){const o=clone(S);delete o.adj;const str=JSON.stringify(o);
+ if(window.CompressionStream){const cs=new CompressionStream('deflate-raw');const w=cs.writable.getWriter();w.write(new TextEncoder().encode(str));w.close();return 'z.'+b64u(new Uint8Array(await new Response(cs.readable).arrayBuffer()))}
+ return 'r.'+encodeURIComponent(str)}
+async function unpackState(t){if(t.startsWith('z.')){const ds=new DecompressionStream('deflate-raw');const w=ds.writable.getWriter();w.write(unb64u(t.slice(2)));w.close();return JSON.parse(new TextDecoder().decode(await new Response(ds.readable).arrayBuffer()))}
+ return JSON.parse(decodeURIComponent(t.slice(2)))}
+async function linkModal(){const d=await packState();const base=location.href.split('#')[0];const url=base+'#d='+d;
+ const warn=location.protocol==='file:'?'<div class="warn">지금은 내 PC의 파일로 열려 있어, 이 링크는 다른 사람이 열 수 없습니다. 웹 주소(https://…)로 열었을 때 만든 링크만 공유됩니다.</div>':'';
+ const long=url.length>7000?'<div class="warn">링크가 길어(약 '+url.length.toLocaleString()+'자) 일부 메신저에서 잘릴 수 있습니다. 그럴 땐 "💾 저장"의 파일 저장 방식을 쓰세요.</div>':'';
+ openModal('🔗 공유 링크 만들기',`<p>이 링크를 열면 <b>지금 입력한 내용 그대로</b> 보입니다. 로그인이나 가입이 필요 없습니다.</p>${warn}${long}<textarea id="mLink" class="ta" style="height:120px" readonly>${esc(url)}</textarea><div class="btns"><button class="btn pri" id="mLinkCopy">링크 복사</button><span id="mMsg" class="sub"></span></div>
+ <div class="rule"><b>알아두세요</b><br>· 링크 안에 입력 내용이 <b>들어 있습니다</b>(서버에 저장되지 않음). 링크를 받은 사람은 누구나 내용을 볼 수 있으니 신뢰하는 사람에게만 보내세요.<br>· 링크는 <b>그 시점의 복사본</b>입니다. 이후 수정하면 새 링크를 다시 만들어야 합니다.<br>· 받은 사람이 고친 내용은 그 사람의 화면에만 반영됩니다.</div>`)}
+function showShared(){let b=$('#sharedBar');if(!b){b=document.createElement('div');b.id='sharedBar';b.className='warn noprint';b.style.cssText='max-width:1280px;margin:12px auto 0;';$('main').before(b)}
+ b.innerHTML='🔗 <b>공유 링크로 열린 화면</b>입니다. 내 브라우저의 기존 저장 내용은 그대로이며, 이 화면에서 수정한 내용은 저장되지 않습니다. <button class="btn sm" id="btnKeep">이 내용을 내 브라우저에 저장</button>'}
+function keepShared(){SHARED=false;try{history.replaceState(null,'',location.href.split('#')[0])}catch(e){}const b=$('#sharedBar');if(b)b.remove();persist();toast('내 브라우저에 저장했습니다')}
+async function loadFromHash(){const m=location.hash.match(/^#d=(.+)$/);if(!m)return;try{const o=await unpackState(m[1]);if(!o.base||!o.bom)throw 0;o.adj={price:0,vol:0,mat:0,inv:0};if(!o.scen)o.scen=defaultScen();if(!o.meta.unit)o.meta.unit='대';S=o;SHARED=true;TAB='dash';buildNav();view();showShared()}catch(e){toast('공유 링크를 읽지 못했습니다 (링크가 잘렸을 수 있습니다)')}}
+function init(){tipEl=$('#tip');buildNav();view();if(window.claude&&window.claude.use){const b=$('#btnLink');if(b)b.style.display='none'}teamInit();loadFromHash()}
 document.addEventListener('DOMContentLoaded',init);
 /* ===== 팀 협업 (공유 데이터 · 검토 의견 · 버전) ===== */
 const TEAM={db:null,user:null,myId:null,exists:false,ready:false,syncOn:true,lastJson:'',pending:null,writing:false,t:null,meta:null,reviews:[],snaps:[],names:{},err:null,readOnly:false,remoteNewer:null,toast:''};
