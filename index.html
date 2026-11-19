@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>사업성 검토 · 원가분석 웹앱 (초안 v0.1)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1F3864;--blue:#2F5597;--bg:#F3F5F9;--line:#DDE2EA;--in:#FFF8E1;--tx:#1d2433;--mut:#6b7385}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 "Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",sans-serif}
+.app-header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 1px 6px rgba(20,30,60,.06)}
+.hrow{display:flex;gap:10px;align-items:center;padding:8px 18px;flex-wrap:wrap}
+.logo{font-weight:700;color:var(--navy);font-size:16px;white-space:nowrap}
+.logo small{display:block;font-weight:400;color:var(--mut);font-size:11px}
+.pn{flex:1;min-width:180px;max-width:360px;font-weight:700;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:14px}
+.acts{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+select.pre{border:1px solid var(--line);border-radius:8px;padding:6px;background:#fff;font-size:13px}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font:inherit;font-size:13px}
+.btn:hover{background:#eef2fb}.btn.pri{background:var(--navy);color:#fff;border-color:var(--navy)}.btn.pri:hover{background:var(--blue)}.btn.sm{padding:4px 10px;font-size:12px}
+.krow{display:flex;gap:16px;align-items:center;padding:6px 18px;background:#f8f9fc;border-top:1px solid var(--line);font-size:13px;flex-wrap:wrap}
+.krow b{color:var(--navy)}
+.chip{white-space:nowrap;display:inline-block;padding:2px 10px;border-radius:99px;font-weight:700;font-size:12px}
+.chip.go{background:#E6F4EA;color:#1E7B3A}.chip.cond{background:#FFF1CC;color:#8A5A00}.chip.nogo{background:#FDE7E7;color:#B3261E}.chip.warnc{background:#FFE9D6;color:#B25000}
+.tabs{display:flex;gap:2px;padding:0 14px;overflow-x:auto;border-top:1px solid var(--line);background:#fff}
+.tab{border:0;background:none;padding:10px 14px;cursor:pointer;font:inherit;font-weight:500;color:var(--mut);border-bottom:3px solid transparent;white-space:nowrap}
+.tab.on{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}.tab:hover{color:var(--navy)}
+.dot{width:8px;height:8px;border-radius:50%;margin-left:6px;display:inline-block}.dot.ok{background:#2E8B57}.dot.no{background:#d0d4dc}
+main{max-width:1280px;margin:0 auto;padding:16px 18px 60px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.ch{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap}.ch h3{margin:0;font-size:15px;color:var(--navy)}.sub{color:var(--mut);font-size:12px}.sum{margin-left:auto;font-size:13px;color:#333}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 14px}.two{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+@media(max-width:900px){.grid2,.grid3,.two{grid-template-columns:1fr}}
+.help{background:#EAF1FF;border:1px solid #C9DBFF;border-radius:10px;padding:10px 14px;margin-bottom:14px;color:#18325f}.help span{color:#3a4f78;font-size:13px}
+.fld{margin-bottom:10px}.fld label{display:block;font-weight:500;margin-bottom:3px;font-size:13px}
+.fw{display:flex;align-items:center;gap:6px}.unit{color:var(--mut);font-size:12px;white-space:nowrap}.hint{font-size:11px;color:var(--blue);min-height:14px}
+.in{width:100%;border:1px solid #E6D9A6;background:var(--in);border-radius:6px;padding:6px 8px;font:inherit;font-size:13px;color:#0b2fa8}
+.in:focus{outline:2px solid #6c8de0;background:#fff}.in.r{text-align:right}
+select.in{padding:5px 4px;color:#0b2fa8}
+.q{display:inline-block;width:15px;height:15px;line-height:15px;text-align:center;border-radius:50%;background:#dbe5fb;color:var(--blue);font-style:normal;font-size:10px;font-weight:700;cursor:help;vertical-align:1px}
+.vols{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.vols small{display:block;color:var(--mut);font-size:11px}
+.rule{margin-top:8px;font-size:12px;color:var(--mut);background:#f6f7fa;border-radius:8px;padding:6px 10px}
+.tw{overflow-x:auto}.tb{width:100%;border-collapse:collapse;font-size:13px}
+.tb th{background:var(--navy);color:#fff;font-weight:500;padding:6px 8px;text-align:center;white-space:nowrap;position:sticky;top:0}
+.tb th.calc{background:#566fa3}
+.tb td{border-bottom:1px solid #EEF0F4;padding:3px 4px}.tb td.r,.r{text-align:right}
+.tb td.calc{text-align:right;background:#f6f8fc;font-weight:500;padding:3px 8px}
+.tb tr.b td{font-weight:700;background:#F2F5FB}.neg{color:#C0392B}.tb td.nt{color:var(--mut);font-size:12px}
+.act{white-space:nowrap;text-align:center}.ib{border:0;background:none;cursor:pointer;color:#8a93a6;font-size:14px;padding:2px 5px}.ib:hover{color:var(--navy)}.ib.del:hover{color:#C0392B}
+.note{font-size:13px;color:#333}
+.srow{position:relative;display:grid;grid-template-columns:130px 130px 1fr 60px;gap:8px;align-items:center;padding:3px 0;font-size:13px}.srow i{display:block;height:8px;background:#8FAADC;border-radius:4px}.srow em{font-style:normal;color:var(--mut);text-align:right}.srow.tot{font-weight:700;border-top:1px solid var(--line);margin-top:4px}
+.hero{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:16px;align-items:stretch}
+@media(max-width:900px){.hero{grid-template-columns:1fr}}
+.rv{border-radius:12px;padding:14px 16px;height:100%}.rv.go{background:#E6F4EA;color:#14532d}.rv.cond{background:#FFF4D6;color:#7a4e00}.rv.nogo{background:#FDE7E7;color:#8f1d16}
+.rvl{font-size:12px;opacity:.8}.rvt{font-size:26px;font-weight:700;margin:2px 0 6px}.rvd{font-size:13px}.rvc{margin-top:8px;font-weight:700}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fbfcfe}.kl{font-size:12px;color:var(--mut)}.kv{font-size:19px;font-weight:700;color:var(--navy)}.ks{font-size:11px;color:var(--mut)}
+.ck{margin-bottom:10px}.ckh{display:flex;justify-content:space-between;font-size:13px}.ck.ok .ckh b{color:#1E7B3A}.ck.bad .ckh b{color:#B3261E}
+.bar{height:8px;background:#e8ebf1;border-radius:4px;overflow:hidden;margin:3px 0}.bar i{display:block;height:100%}.ck.ok .bar i{background:#2E8B57}.ck.bad .bar i{background:#C0392B}
+.ckv{font-size:12px}.ckv span{color:var(--mut)}
+.tag{display:inline-block;border-radius:6px;padding:0 6px;font-size:11px;font-weight:700}.tag.ok{background:#E6F4EA;color:#1E7B3A}.tag.bad{background:#FDE7E7;color:#B3261E}
+.adv{margin:8px 0 0;padding-left:18px;font-size:13px}.adv li{margin-bottom:4px}.warnl li{color:#8f1d16}.okmsg{color:#1E7B3A;font-weight:500}
+.warn{background:#FFF1E0;border:1px solid #FFD2A3;color:#8a4600;border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:13px}
+.chart{width:100%;height:auto;display:block}
+.sliders{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:12px}@media(max-width:900px){.sliders{grid-template-columns:1fr 1fr}}
+.sl label{display:block;font-size:13px;font-weight:500}.sl input{width:100%}.sl b{font-size:16px;color:var(--navy)}
+.btns{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-left:auto}
+.heat{border-collapse:collapse;width:100%;font-size:12px}.heat th{background:#eef1f7;padding:5px 6px;font-weight:500}.heat td{text-align:center;padding:7px 4px;border:2px solid #fff;white-space:nowrap}.rep .heat{font-size:10px}.rep .heat td{padding:5px 2px}
+#tip{display:none;position:fixed;z-index:60;width:340px;max-width:92vw;background:#fff;border:1px solid #b9c6e6;border-radius:12px;box-shadow:0 8px 28px rgba(20,30,70,.22);padding:12px 14px;font-size:12.5px;line-height:1.5}
+#tip .tt{font-weight:700;color:var(--navy);font-size:13.5px;margin-bottom:4px}#tip .tr{background:#F1F6FF;border-radius:8px;padding:6px 8px;margin-top:6px}#tip .te{background:#FFF8E1;border-radius:8px;padding:6px 8px;margin-top:6px}
+#tip .tf{color:#98a0b3;font-size:11px;margin-top:6px}.tchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.tchips button{border:1px solid #9db4ea;background:#fff;color:var(--blue);border-radius:99px;padding:2px 10px;font-size:12px;cursor:pointer}.tchips button:hover{background:var(--blue);color:#fff}
+.mback{position:fixed;inset:0;background:rgba(15,20,40,.45);z-index:80;display:flex;align-items:center;justify-content:center;padding:16px}.mbox{background:#fff;border-radius:14px;max-width:720px;width:100%;max-height:88vh;overflow:auto}
+.mh{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}.mb{padding:14px 16px}.ta{width:100%;height:220px;font:12px/1.4 monospace;border:1px solid var(--line);border-radius:8px;padding:8px}
+/* 보고서 */
+.rep{background:#fff;border:1px solid var(--line);border-radius:6px;padding:22px 26px;max-width:900px;margin:0 auto}
+.rhead{display:flex;justify-content:space-between;gap:12px;border-bottom:3px solid var(--navy);padding-bottom:8px;margin-bottom:12px}.rtt{font-size:20px;font-weight:700;color:var(--navy)}.rs{font-size:12px;color:var(--mut)}.rm{font-size:11px;color:var(--mut);text-align:right}
+.rep h4{margin:14px 0 6px;font-size:13.5px;color:var(--navy);border-left:4px solid var(--navy);padding-left:8px}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:12px}.rk{margin-top:10px}.rep .rv{margin-bottom:0}
+.rep .tb{font-size:11.5px}.rep .tb th{position:static}.rtb th,.rtb td{padding:3px 6px}
+.foot{margin-top:14px;font-size:10.5px;color:#7a8296;border-top:1px solid var(--line);padding-top:6px}
+.rep .ck{margin-bottom:6px}
+.pb{height:0}
+#toast{display:none;position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#1d2433;color:#fff;padding:9px 16px;border-radius:99px;font-size:13px;z-index:90}
+.stances{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}.st{border:1px solid var(--line);border-radius:99px;padding:5px 12px;cursor:pointer;font-weight:500}.st input{margin-right:4px}
+.rvi{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:8px}.rvh{margin-bottom:4px}.rvc2{font-size:13px;white-space:normal}.sw{display:block;margin-top:6px;font-size:13px}
+@media print{ #toast{display:none!important}
+ @page{size:A4 portrait;margin:11mm}
+ body{background:#fff;font-size:11px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .app-header,.noprint,#tip,#modal,.btn,.ib,.tabs{display:none!important}
+ main{padding:0;max-width:none}.card{break-inside:avoid;border-color:#ccc}.rep{border:0;padding:0;max-width:none}
+ .pb{break-after:page}.rg>div,.rv,.ck{break-inside:avoid}
+ .hero{grid-template-columns:1fr}.grid2{grid-template-columns:1fr 1fr}
+}
+</style></head><body>
+<header class="app-header">
+ <div class="hrow"><div class="logo">사업성 검토 · 원가분석<small>자동차/부품 신규사업 의사결정 도구 (초안 v0.1)</small></div>
+  <input id="pn" class="pn in" type="text" data-path="meta.name" data-kind="text" placeholder="프로젝트명">
+  <div class="acts"><select id="preset" class="pre"><option value="staria">예시: 스타리아 EV 어린이차</option><option value="pv7">예시: PV7 어린이차 (복사본)</option><option value="part">예시: 신규 부품 단품</option><option value="blank">빈 템플릿</option></select><button class="btn" id="btnNew">예시 불러오기</button><button class="btn" id="btnExport">💾 저장</button><button class="btn" id="btnImport">📂 불러오기</button><button class="btn pri" id="btnPrint">🖨 인쇄</button></div></div>
+ <div class="krow" id="topKpi"></div><nav class="tabs" id="nav"></nav>
+</header>
+<main id="view"></main>
+<div id="tip"></div><div id="modal" style="display:none"></div>
+<script>
+/* ===== 계산 엔진 (엑셀 템플릿과 동일 로직) ===== */
+const CATS=['기반차량','신규개발부품','구매부품','부자재·소모품'];
+const num=v=>{const n=typeof v==='number'?v:parseFloat(String(v??'').replace(/,/g,''));return isFinite(n)?n:0};
+const has=v=>v!==''&&v!==null&&v!==undefined&&isFinite(typeof v==='number'?v:parseFloat(String(v).replace(/,/g,'')));
+
+function calc(S,adj){
+  adj=adj||S.adj; const B=S.base,C=S.crit,R={};
+  // 재료비
+  R.mat={};CATS.forEach(c=>R.mat[c]=0);R.matRow=[];
+  S.bom.forEach((r,i)=>{ if(has(r.qty)&&has(r.price)){const v=num(r.qty)*num(r.price)*(1+num(r.loss)); R.matRow[i]=v; if(r.cat in R.mat)R.mat[r.cat]+=v; R.matTot=(R.matTot||0)+v;} else R.matRow[i]=null;});
+  R.matTot=R.matTot||0;
+  // 공정
+  R.procRow=[];R.procTot=0;
+  S.proc.forEach((r,i)=>{ if(!r.name&&!has(r.min)&&!has(r.out)){R.procRow[i]=null;return;}
+    const eff=num(r.eff)===0?1:num(r.eff);
+    const v=r.type==='외주'?num(r.out):num(r.min)/60*(num(r.ppl)*num(r.rate)+num(r.eq))/eff; R.procRow[i]=v;R.procTot+=v;});
+  // 물류
+  R.logUnit=0;R.logFix=0;S.log.forEach(r=>{ if(r.type==='연고정')R.logFix+=num(r.amt); else R.logUnit+=num(r.amt);});
+  // 투자/개발
+  const dep=rows=>rows.map(r=>({amt:num(r.amt),yrs:num(r.yrs),dep:num(r.yrs)>0?num(r.amt)/num(r.yrs):0}));
+  R.invRows=dep(S.inv);R.devRows=dep(S.dev);
+  R.invTot=R.invRows.reduce((a,r)=>a+r.amt,0);R.devTot=R.devRows.reduce((a,r)=>a+r.amt,0);
+  R.launchTot=S.launch.reduce((a,r)=>a+num(r.amt),0);
+  R.noYrs=[...R.invRows,...R.devRows].filter(r=>r.amt>0&&!(r.yrs>0)).reduce((a,r)=>a+r.amt,0);
+  const depAt=t=>[...R.invRows,...R.devRows].reduce((a,r)=>a+(r.yrs>=t?r.dep:0),0)*(1+adj.inv);
+  // 연도별
+  const Y=[];
+  for(let t=1;t<=5;t++){
+    const y={t}; y.units=num(B.vols[t-1])*(1+adj.vol);
+    y.price=num(B.price)*(1+adj.price)*Math.pow(1-num(B.erosion),t-1);
+    y.rev=y.units*y.price;
+    y.mat=y.units*R.matTot*(1+adj.mat)*Math.pow(1-num(B.ve),t-1);
+    y.proc=y.units*R.procTot*Math.pow(1+num(B.infl),t-1);
+    y.log=y.units*R.logUnit*Math.pow(1+num(B.infl),t-1);
+    y.cogs=y.mat+y.proc+y.log; y.gp=y.rev-y.cogs;
+    y.fee=y.rev*num(B.fee);y.warr=y.rev*num(B.warr);y.sga=y.rev*num(B.sga);
+    y.fixSga=num(B.fixed)*Math.pow(1+num(B.infl),t-1);
+    y.fixLog=R.logFix*Math.pow(1+num(B.infl),t-1);
+    y.dep=depAt(t); y.launch=t===1?R.launchTot:0;
+    y.fixTot=y.fixSga+y.fixLog+y.dep+y.launch;
+    y.ebit=y.gp-y.fee-y.warr-y.sga-y.fixTot;
+    y.opm=y.rev?y.ebit/y.rev:0;
+    y.tax=Math.max(0,y.ebit)*num(B.tax); y.ni=y.ebit-y.tax;
+    const prev=t===1?0:Y[t-2].rev; y.dwc=(y.rev-prev)*num(B.wc);
+    y.fcf=y.ni+y.dep+y.launch-y.dwc;
+    Y.push(y);
+  }
+  R.Y=Y;
+  R.invest=(R.invTot+R.devTot)*(1+adj.inv)+R.launchTot;
+  const flows=[-R.invest,...Y.map(y=>y.fcf)];R.flows=flows;
+  R.cum=[];flows.reduce((a,v,i)=>R.cum[i]=a+v,0);
+  R.pv=flows.map((v,i)=>v/Math.pow(1+num(B.wacc),i));
+  R.pvCum=[];R.pv.reduce((a,v,i)=>R.pvCum[i]=a+v,0);
+  R.npv=R.pv.reduce((a,v)=>a+v,0);
+  R.irr=irr(flows);
+  const pb=cum=>{for(let t=1;t<=5;t++){if(cum[t-1]<0&&cum[t]>=0){const f=cum===R.cum?flows[t]:R.pv[t];return (t-1)+(-cum[t-1])/f;}}return null};
+  R.pb=pb(R.cum);R.dpb=pb(R.pvCum);
+  R.rev5=Y.reduce((a,y)=>a+y.rev,0);R.ebit5=Y.reduce((a,y)=>a+y.ebit,0);R.opm5=R.rev5?R.ebit5/R.rev5:0;
+  // 대당(1년차)
+  const y1=Y[0],u={};
+  u.price=y1.price;u.matBase=R.mat['기반차량']*(1+adj.mat);u.matDev=R.mat['신규개발부품']*(1+adj.mat);
+  u.matBuy=R.mat['구매부품']*(1+adj.mat);u.matSub=R.mat['부자재·소모품']*(1+adj.mat);
+  u.mat=u.matBase+u.matDev+u.matBuy+u.matSub;
+  // 구분 미지정 재료비도 포함
+  u.mat=R.matTot*(1+adj.mat); u.matOther=u.mat-(u.matBase+u.matDev+u.matBuy+u.matSub);
+  u.proc=R.procTot;u.log=R.logUnit;u.cost=u.mat+u.proc+u.log;u.gp=u.price-u.cost;
+  u.fee=u.price*num(B.fee);u.warr=u.price*num(B.warr);u.sga=u.price*num(B.sga);u.var=u.fee+u.warr+u.sga;
+  u.cm=u.gp-u.var;u.cmr=u.price?u.cm/u.price:0;R.u=u;
+  R.bep=u.cm>0?y1.fixTot/u.cm:null;
+  R.bepr=(R.bep!==null&&y1.units>0)?R.bep/y1.units:null;
+  R.paybackUnits=u.cm>0?R.invest/u.cm:null;
+  const den=1-num(B.fee)-num(B.warr)-num(B.sga)-num(C.opm);
+  R.req=(y1.units>0&&den>0)?((y1.cogs+y1.fixTot)/y1.units)/den:null;
+  R.reqUp=(R.req!==null&&y1.price>0)?R.req/y1.price-1:null;
+  // 판정
+  const ck=[
+   {k:'NPV',label:'NPV (순현재가치)',tgt:num(C.npv),act:R.npv,ok:R.npv>=num(C.npv),f:'won',dir:'≥'},
+   {k:'IRR',label:'IRR (내부수익률)',tgt:num(C.irr),act:R.irr,ok:R.irr!==null&&R.irr>=num(C.irr),f:'pct',dir:'≥'},
+   {k:'회수기간',label:'투자회수기간(년)',tgt:num(C.pb),act:R.pb,ok:R.pb!==null&&R.pb<=num(C.pb),f:'yr',dir:'≤'},
+   {k:'영업이익률',label:'5년 평균 영업이익률',tgt:num(C.opm),act:R.opm5,ok:R.opm5>=num(C.opm),f:'pct',dir:'≥'},
+   {k:'공헌이익률',label:'대당 공헌이익률',tgt:num(C.cm),act:u.cmr,ok:u.cmr>=num(C.cm),f:'pct',dir:'≥'},
+   {k:'BEP 안전율',label:'BEP ÷ 1년차 계획대수',tgt:num(C.bep),act:R.bepr,ok:R.bepr!==null&&R.bepr<=num(C.bep),f:'pct',dir:'≤'}];
+  R.checks=ck;R.cnt=ck.filter(c=>c.ok).length;
+  R.verdict=(ck[0].ok&&ck[1].ok&&R.cnt>=5)?'GO':(ck[0].ok&&R.cnt>=4)?'CONDITIONAL':'NOGO';
+  R.fail=ck.filter(c=>!c.ok).map(c=>c.k);
+  return R;
+}
+function irr(f){
+  const npv=r=>f.reduce((a,v,i)=>a+v/Math.pow(1+r,i),0);
+  let lo=-0.95,hi=10; let flo=npv(lo),fhi=npv(hi);
+  if(!(flo*fhi<0)) return null;
+  for(let i=0;i<200;i++){const m=(lo+hi)/2,fm=npv(m); if(flo*fm<=0){hi=m;fhi=fm}else{lo=m;flo=fm}}
+  return (lo+hi)/2;
+}
+/* NPV=0 한계점: 한 변수만 움직였을 때 NPV가 0이 되는 조정률 */
+function breakEven(S,key){
+  const f=x=>{const a={...S.adj};a[key]=x;return calc(S,a).npv};
+  let lo=-0.6,hi=1.0,flo=f(lo),fhi=f(hi);
+  if(flo*fhi>0)return null;
+  for(let i=0;i<60;i++){const m=(lo+hi)/2,fm=f(m);if(flo*fm<=0){hi=m;fhi=fm}else{lo=m;flo=fm}}
+  return (lo+hi)/2;
+}
+/* ===== 프리셋 ===== */
+const clone=o=>JSON.parse(JSON.stringify(o));
+function baseDefaults(){return{price:0,vols:[0,0,0,0,0],erosion:.02,ve:.01,infl:.03,fee:0,warr:.005,sga:.03,fixed:0,tax:.22,wacc:.10,wc:.10}}
+function critDefaults(){return{npv:0,irr:.15,pb:3,opm:.08,cm:.15,bep:.70}}
+function presetStaria(){return{
+ meta:{name:'스타리아 EV 어린이차 (예시)',car:'스타리아 EV',author:'',reviewer:'',unit:'대'},
+ base:{price:71000000,vols:[30,50,70,80,80],erosion:.02,ve:.01,infl:.03,fee:.03,warr:.005,sga:.03,fixed:120000000,tax:.22,wacc:.10,wc:.10},
+ crit:critDefaults(),adj:{price:0,vol:0,mat:0,inv:0},
+ bom:[
+ {cat:'기반차량',code:'HYU-BASE',name:'스타리아 EV 기반차량 (출고가, VAT 제외)',qty:1,price:50000000,loss:0},
+ {cat:'신규개발부품',code:'KID-001',name:'어린이용 시트 (3점식 벨트 포함)',qty:9,price:230000,loss:.02},
+ {cat:'구매부품',code:'KID-002',name:'어린이보호 표지·LED 표시등',qty:1,price:150000,loss:.01},
+ {cat:'구매부품',code:'KID-003',name:'황색·적색 점멸등 세트',qty:1,price:220000,loss:.01},
+ {cat:'신규개발부품',code:'KID-004',name:'정지표시장치 (전동 STOP 표지판)',qty:1,price:180000,loss:.02},
+ {cat:'구매부품',code:'KID-005',name:'후방카메라 + 실내 CCTV',qty:1,price:350000,loss:.01},
+ {cat:'신규개발부품',code:'KID-006',name:'승강 보조발판',qty:1,price:120000,loss:.02},
+ {cat:'구매부품',code:'KID-007',name:'외장 도장/래핑 자재',qty:1,price:900000,loss:.03},
+ {cat:'구매부품',code:'KID-008',name:'하차확인장치',qty:1,price:130000,loss:.01},
+ {cat:'구매부품',code:'KID-009',name:'소화기·구급함',qty:1,price:60000,loss:0},
+ {cat:'신규개발부품',code:'KID-010',name:'내장재 (바닥/손잡이/커버)',qty:1,price:280000,loss:.03},
+ {cat:'구매부품',code:'KID-011',name:'배선 하네스·퓨즈',qty:1,price:95000,loss:.02},
+ {cat:'부자재·소모품',code:'KID-012',name:'볼트·너트·브라켓 일체',qty:1,price:120000,loss:.05}],
+ proc:[
+ {name:'기반차량 입고·검수',type:'자체',min:30,ppl:2,rate:25000,eq:5000,eff:.9,out:''},
+ {name:'시트·안전벨트 장착',type:'자체',min:180,ppl:2,rate:25000,eq:5000,eff:.9,out:''},
+ {name:'전장(램프·카메라·표시등) 배선',type:'자체',min:180,ppl:2,rate:25000,eq:8000,eff:.9,out:''},
+ {name:'발판·내장재·표지 조립',type:'자체',min:120,ppl:2,rate:25000,eq:3000,eff:.9,out:''},
+ {name:'도장·래핑 (외주)',type:'외주',min:'',ppl:'',rate:'',eq:'',eff:'',out:600000},
+ {name:'최종검사·시운전',type:'자체',min:60,ppl:2,rate:25000,eq:5000,eff:.95,out:''},
+ {name:'튜닝검사 대행 (외주)',type:'외주',min:'',ppl:'',rate:'',eq:'',eff:'',out:200000}],
+ log:[{type:'대당',name:'기반차량 입고 운송(탁송)',amt:250000},{type:'대당',name:'완성차 출고 탁송',amt:350000},{type:'대당',name:'부품 입고 운송',amt:60000},{type:'대당',name:'포장·적재·보호재',amt:40000},{type:'대당',name:'사고·파손 충당',amt:30000},{type:'연고정',name:'보관(야적/창고) 연간 비용',amt:6000000}],
+ inv:[{cat:'설비·지그',name:'시트 장착 브라켓 지그',amt:15000000,yrs:5},{cat:'설비·지그',name:'도장 마스킹 지그',amt:8000000,yrs:5},{cat:'설비·지그',name:'배선 테스트 설비',amt:12000000,yrs:5},{cat:'검사구',name:'최종검사 장비',amt:20000000,yrs:5},{cat:'시설',name:'작업장 개조·환경 정비',amt:30000000,yrs:5},{cat:'금형',name:'신규 부품 금형 (발판·내장커버)',amt:80000000,yrs:5}],
+ dev:[{cat:'설계·엔지니어링',name:'개조 설계 (CAD/CAE)',amt:40000000,yrs:3},{cat:'시작·시험',name:'시작차 제작 및 성능시험',amt:60000000,yrs:3},{cat:'시작·시험',name:'강도·안전 시험',amt:45000000,yrs:3},{cat:'인증·승인',name:'튜닝승인·안전검사 수수료',amt:15000000,yrs:3},{cat:'인건비',name:'개발 인건비',amt:60000000,yrs:3}],
+ launch:[{cat:'시험생산',name:'파일럿 생산(3대) 재료·공임',amt:18000000},{cat:'교육',name:'작업자·검사원 교육',amt:5000000},{cat:'초도품질',name:'초기 유동관리·클레임 대응',amt:12000000},{cat:'마케팅',name:'론칭·시승·홍보물',amt:15000000}],
+ scen:defaultScen()}}
+function defaultScen(){return[
+ ['기준(Base)',0,0,0,0],['판매단가 -10%',-.10,0,0,0],['판매단가 -5%',-.05,0,0,0],['판매단가 +5%',.05,0,0,0],['판매대수 -30%',0,-.30,0,0],['판매대수 -20%',0,-.20,0,0],['판매대수 +20%',0,.20,0,0],
+ ['재료비 +10%',0,0,.10,0],['재료비 +5%',0,0,.05,0],['재료비 -5%',0,0,-.05,0],['투자·개발비 +20%',0,0,0,.20],
+ ['최악 복합 (단가-5/대수-20/재료+5/투자+10)',-.05,-.20,.05,.10],['최선 복합 (단가+5/대수+20/재료-5/투자-10)',.05,.20,-.05,-.10]
+ ].map(a=>({name:a[0],p:a[1],v:a[2],m:a[3],i:a[4]}))}
+function presetPV7(){const s=presetStaria();s.meta.name='PV7 어린이차 (스타리아 값 복사 - 교체 필요)';s.meta.car='PV7';s.bom[0].code='KIA-PV7';s.bom[0].name='PV7 기반차량 (출고가 입력 필요, VAT 제외)';return s}
+function presetPart(){return{
+ meta:{name:'신규 부품 단품 개발 (예시: 시트 브라켓)',car:'기타',author:'',reviewer:'',unit:'개'},
+ base:{price:9800,vols:[100000,150000,200000,200000,200000],erosion:.03,ve:.01,infl:.03,fee:0,warr:.005,sga:.02,fixed:200000000,tax:.22,wacc:.10,wc:.12},
+ crit:critDefaults(),adj:{price:0,vol:0,mat:0,inv:0},
+ bom:[{cat:'구매부품',code:'RM-001',name:'강판 SPFH590 (블랭크)',qty:1.8,price:1350,loss:.08},{cat:'구매부품',code:'RM-002',name:'용접너트',qty:2,price:45,loss:.01},{cat:'부자재·소모품',code:'RM-003',name:'볼트·와셔·포장재',qty:1,price:60,loss:.02}],
+ proc:[{name:'프레스 성형',type:'자체',min:.25,ppl:1,rate:28000,eq:45000,eff:.85,out:''},{name:'용접',type:'자체',min:.4,ppl:1,rate:28000,eq:12000,eff:.85,out:''},{name:'표면처리 (외주)',type:'외주',min:'',ppl:'',rate:'',eq:'',eff:'',out:700},{name:'검사·포장',type:'자체',min:.2,ppl:2,rate:28000,eq:3000,eff:.9,out:''}],
+ log:[{type:'대당',name:'포장재(리턴 박스 감가)',amt:120},{type:'대당',name:'납품 운송',amt:90},{type:'연고정',name:'납입 창고 임대',amt:12000000}],
+ inv:[{cat:'금형',name:'프레스 금형 세트',amt:600000000,yrs:5},{cat:'설비·지그',name:'용접 지그·검사구',amt:300000000,yrs:5}],
+ dev:[{cat:'설계·엔지니어링',name:'제품 설계·해석',amt:100000000,yrs:3},{cat:'시작·시험',name:'시작품·내구시험',amt:100000000,yrs:3},{cat:'인증·승인',name:'PPAP·고객 승인',amt:50000000,yrs:3}],
+ launch:[{cat:'시험생산',name:'초도 양산 조건 확립',amt:30000000},{cat:'교육',name:'작업자 교육',amt:5000000},{cat:'초도품질',name:'초기 유동관리',amt:15000000}],
+ scen:defaultScen()}}
+function presetBlank(){const b=baseDefaults();return{meta:{name:'새 프로젝트',car:'기타',author:'',reviewer:'',unit:'대'},base:b,crit:critDefaults(),adj:{price:0,vol:0,mat:0,inv:0},
+ bom:[{cat:'구매부품',code:'',name:'',qty:'',price:'',loss:''}],proc:[{name:'',type:'자체',min:'',ppl:'',rate:'',eq:'',eff:'',out:''}],log:[{type:'대당',name:'',amt:''}],
+ inv:[{cat:'설비·지그',name:'',amt:'',yrs:5}],dev:[{cat:'설계·엔지니어링',name:'',amt:'',yrs:3}],launch:[{cat:'시험생산',name:'',amt:''}],scen:defaultScen()}}
+
+/* ===== 입력 가이드 (마우스를 올리거나 칸을 클릭하면 표시) ===== */
+const DISC='※ 참고치는 일반적인 가늠자일 뿐입니다. 반드시 회사의 실제 견적·실적으로 대체하세요.';
+const P=(l,v)=>[l,v];
+const TIPS={
+'base.price':{t:'판매단가 (VAT 제외, 1대/1개당)',d:'고객(대리점·OEM·최종고객)에게 받는 1대(1개)당 가격입니다. 부가세는 빼고 입력합니다.',r:'① 원가+목표이익으로 역산한 값 ② 경쟁사·유사 차량 가격 중 낮은 쪽을 보수적 기준으로 삼으세요. 아래 "필요 판매단가"가 목표 이익률을 맞추는 최소 가격입니다.',e:'기반차량 5천만원 + 개조부품 + 이익 → 7,100만원',chips:[['필요 판매단가 적용','@req']]},
+'base.vols':{t:'연도별 판매대수 (대/개)',d:'1~5년차에 실제로 팔 수 있는 수량입니다. 가장 흔한 실패 원인은 판매량을 낙관적으로 잡는 것입니다.',r:'수주·계약·보조금 확정 물량만 기준으로 잡고, 미확정분은 시장상황 시나리오(비관)로 따로 점검하세요. 보통 1년차는 낮게, 3년차 전후에 정점이 됩니다.',e:'30 → 50 → 70 → 80 → 80'},
+'base.erosion':{t:'연 판매단가 인하율 (2년차부터)',d:'경쟁·고객의 단가 인하 요구로 해마다 판매가가 내려가는 비율입니다.',r:'OEM 납품 부품은 연 1~3% 인하 요구가 흔합니다. 완성차 개조·소량 사업은 0~2%.',e:'2% → 2년차 단가는 1년차의 98%',chips:[P('0%',0),P('1%',.01),P('2%',.02),P('3%',.03)]},
+'base.ve':{t:'연 재료비 절감률 (VE·구매 절감)',d:'원가절감 활동으로 해마다 재료비가 줄어드는 비율입니다. 근거 없는 절감은 0으로 두는 것이 냉정합니다.',r:'통상 0~2%. 협력사와 합의된 절감 계획이 있을 때만 반영하세요.',e:'1%',chips:[P('0%',0),P('1%',.01),P('2%',.02)]},
+'base.infl':{t:'연 가공비·물류비·고정비 인상률',d:'인건비·물가 상승으로 해마다 늘어나는 비율입니다.',r:'통상 2~4% (최저임금·물가 상승 반영).',e:'3%',chips:[P('2%',.02),P('3%',.03),P('4%',.04)]},
+'base.fee':{t:'판매수수료율 (매출 대비)',d:'대리점·딜러·영업대행에 주는 수수료입니다. 직접 납품이면 0%.',r:'직납(OEM) 0%, 대리점 판매 시 통상 3~8%.',e:'대리점 3%',chips:[P('0% (직납)',0),P('3%',.03),P('5%',.05),P('8%',.08)]},
+'base.warr':{t:'보증충당금율 (매출 대비)',d:'품질 문제로 무상 수리·교환할 비용을 미리 쌓는 비율입니다.',r:'통상 0.3~1.5%. 신규 개발품·안전 관련 품목은 높게 잡으세요.',e:'0.5%',chips:[P('0.3%',.003),P('0.5%',.005),P('1%',.01),P('1.5%',.015)]},
+'base.sga':{t:'일반관리·판매비율 (매출 대비, 변동)',d:'매출에 비례해 늘어나는 관리·영업·광고·운영비입니다.',r:'통상 2~5%. 고정으로 나가는 인건비 등은 아래 "연 고정 판관비"에 넣으세요.',e:'3%',chips:[P('2%',.02),P('3%',.03),P('5%',.05)]},
+'base.fixed':{t:'연 고정 판관비 (원/년)',d:'판매량과 상관없이 매년 나가는 비용(전담 인력 인건비, 사무실, 영업 고정비 등)입니다.',r:'전담 인원 수 × 1인당 연 총인건비(급여+4대보험+복리후생, 통상 6천~8천만원/인)로 계산하세요.',e:'전담 2명 × 6천만원 = 1.2억원',chips:[P('6,000만',60000000),P('1.2억',120000000),P('2억',200000000)]},
+'base.tax':{t:'법인세율 (지방소득세 포함)',d:'이익이 난 해에만 부과합니다(결손 이월은 반영하지 않는 보수적 방식).',r:'중소·중견 제조사는 실효 20~22% 안팎이 일반적입니다. 세무 담당자 확인 필요.',e:'22%',chips:[P('20.9%',.209),P('22%',.22)]},
+'base.wacc':{t:'할인율 (요구수익률/WACC)',d:'미래 돈을 현재 가치로 깎는 비율입니다. 높을수록 NPV가 작아지고 판정이 엄격해집니다.',r:'제조 중소·중견 통상 8~12%, 신규 사업·단일 고객 의존도가 높으면 12~15%.',e:'10%',chips:[P('8%',.08),P('10%',.10),P('12%',.12),P('15%',.15)]},
+'base.wc':{t:'운전자본율 (매출 대비)',d:'외상매출 + 재고 − 외상매입으로 묶이는 돈이 매출의 몇 %인지입니다. 매출이 늘면 그만큼 현금이 묶입니다.',r:'통상 5~15%. 결제조건이 길고 재고가 많을수록 높게.',e:'10%',chips:[P('5%',.05),P('10%',.10),P('15%',.15)]},
+'crit.npv':{t:'최소 NPV (원)',d:'이 금액 이상 NPV가 나와야 통과합니다. 보통 0원(플러스면 통과)입니다.',r:'리스크가 큰 사업은 0보다 높게 설정해 안전마진을 두세요.',e:'0',chips:[P('0원',0),P('1억',100000000)]},
+'crit.irr':{t:'최소 IRR (내부수익률)',d:'투자 수익률이 이 값 이상이어야 통과합니다. 할인율보다 높게 두는 것이 일반적입니다.',r:'통상 15~20% (할인율 + 위험 프리미엄).',e:'15%',chips:[P('12%',.12),P('15%',.15),P('20%',.20)]},
+'crit.pb':{t:'최대 투자회수기간 (년)',d:'투자금을 몇 년 안에 되찾아야 하는지입니다.',r:'자동차 개조·부품 신규 사업은 통상 3~4년 이내를 요구합니다.',e:'3년',chips:[P('2년',2),P('3년',3),P('4년',4)]},
+'crit.opm':{t:'최소 5년 평균 영업이익률',d:'5년 평균 영업이익률이 이 값 이상이어야 통과합니다.',r:'자동차 부품업 평균이 통상 3~7% 수준이라 5~8%면 보수적 기준입니다.',e:'8%',chips:[P('5%',.05),P('8%',.08),P('10%',.10)]},
+'crit.cm':{t:'최소 대당 공헌이익률',d:'1대 팔 때 (판매가 − 변동비)가 판매가의 몇 %는 남아야 하는지입니다. 고정비를 감당할 체력입니다.',r:'통상 15~25%.',e:'15%',chips:[P('15%',.15),P('20%',.20),P('25%',.25)]},
+'crit.bep':{t:'BEP ÷ 계획대수 상한 (안전율)',d:'손익분기점 판매대수가 1년차 계획의 몇 % 이하여야 안전하다고 볼지 정합니다. 낮을수록 엄격합니다.',r:'통상 60~80% (계획이 20~40% 미달해도 적자를 면하는 수준).',e:'70%',chips:[P('60%',.6),P('70%',.7),P('80%',.8)]},
+'adj.price':{t:'시장 시나리오: 판매단가 조정',d:'시장 가격이 계획보다 오르거나 내릴 때 시험해 보는 슬라이더입니다. 실제 입력값은 바뀌지 않습니다.',r:'비관 −5~−10%, 낙관 +5%.'},
+'adj.vol':{t:'시장 시나리오: 판매대수 조정',d:'수요가 계획보다 많거나 적을 때를 시험합니다.',r:'비관 −20~−30%, 낙관 +20%.'},
+'adj.mat':{t:'시장 시나리오: 재료비 조정',d:'기반차량 가격·부품 단가·환율·원자재 변동을 시험합니다.',r:'비관 +5~+10%, 낙관 −5%.'},
+'adj.inv':{t:'시장 시나리오: 투자·개발비 조정',d:'금형·설비·개발비가 초과될 때를 시험합니다.',r:'신규 개발 프로젝트는 통상 10~30% 초과가 흔합니다.'},
+'bom.cat':{t:'구분',d:'원가 구조 분석에 쓰이는 분류입니다. 기반이 되는 완성차(또는 모재)는 "기반차량", 새로 개발하는 부품은 "신규개발부품".',r:'미지정이면 재료비 합계에는 들어가지만 구조 그래프에서는 "기타"로 표시됩니다.'},
+'bom.code':{t:'품번',d:'도면·견적서의 부품 번호입니다. 비워도 계산에는 영향이 없습니다.'},
+'bom.name':{t:'부품명',d:'부품 또는 자재의 이름입니다.'},
+'bom.qty':{t:'수량 (1대/1개당)',d:'완성품 1개를 만들 때 들어가는 개수(또는 kg·m 등 소요량)입니다.',r:'BOM(부품표)의 소요량 기준. 소수점 가능(예: 강판 1.8kg).',e:'어린이용 시트 9개 → 9'},
+'bom.price':{t:'단가 (원)',d:'부품 1개(또는 단위당) 구매 가격입니다. VAT 제외.',r:'협력사 견적서·최근 세금계산서 기준. 외화 구매품은 환율 변동 위험이 있으니 시장 시나리오(재료비 +)로 점검하세요.',e:'시트 1개 230,000원'},
+'bom.loss':{t:'로스율 (%)',d:'가공·조립 중 버려지거나 불량 나는 비율입니다. 재료비에 더해집니다.',r:'조립품 0~3%, 절단·도장·소모 자재 5~10%.',e:'2% → 2',chips:[P('0%',0),P('2%',.02),P('5%',.05),P('10%',.10)]},
+'proc.name':{t:'공정명',d:'제조·조립·검사 단계의 이름입니다.'},
+'proc.type':{t:'자체 / 외주',d:'직접 작업하면 "자체"(시간×임율로 계산), 협력사에 맡기면 "외주"(외주단가를 직접 입력).'},
+'proc.min':{t:'작업시간 (분/대)',d:'1대(1개)를 만드는 데 걸리는 실제 작업시간입니다. 인원이 여러 명이면 "한 명 기준 시간"이 아니라 "작업 경과 시간"을 넣고 인원을 따로 입력하세요.',r:'스톱워치로 직접 측정한 사이클타임(여유율 포함)이 가장 정확합니다. 추정치는 실측값이 나오면 반드시 교체하세요.',e:'시트 장착 180분 (2명 동시 작업)'},
+'proc.ppl':{t:'투입 인원 (명)',d:'그 공정에 동시에 일하는 사람 수입니다.',e:'2'},
+'proc.rate':{t:'임율 (원/시간, 1인)',d:'작업자 1명의 시간당 총 노무비(급여 + 4대보험 + 복리후생 + 퇴직급여)입니다.',r:'제조 현장 통상 25,000~40,000원/시간 (최저임금·숙련도·간접 포함 여부에 따라 다름). 회사 급여대장 기준이 가장 정확합니다.',e:'25,000',chips:[P('25,000',25000),P('30,000',30000),P('35,000',35000),P('40,000',40000)]},
+'proc.eq':{t:'설비·경비 (원/시간)',d:'설비 감가상각, 전력, 유지보수, 공장 경비를 시간당으로 환산한 금액입니다. 수작업이면 작게.',r:'수작업·소형 공구 3,000~8,000원/시간, 용접·조립 설비 10,000~20,000, 프레스·사출 대형 설비 40,000원 이상.',e:'5,000',chips:[P('3,000',3000),P('8,000',8000),P('20,000',20000),P('45,000',45000)]},
+'proc.eff':{t:'효율 / 가동률 (%)',d:'실제 일할 수 있는 시간 비율입니다. 100%보다 낮을수록 원가가 올라갑니다. 비워두면 100%로 계산.',r:'수작업 85~95%, 자동화 설비 80~90%.',e:'90 → 90%',chips:[P('85%',.85),P('90%',.90),P('95%',.95)]},
+'proc.out':{t:'외주단가 (원/대)',d:'"외주" 공정일 때 협력사에 주는 1대(1개)당 가공비입니다.',r:'외주 견적서 기준. 최소 2곳 이상 비교 견적을 권장합니다.',e:'도장·래핑 600,000원'},
+'log.type':{t:'구분 (대당 / 연고정)',d:'1대 팔 때마다 드는 물류비는 "대당", 판매량과 무관하게 매년 드는 비용(창고 임대 등)은 "연고정".'},
+'log.name':{t:'항목',d:'운송, 포장, 보관, 하역 등 물류 비용 항목입니다.'},
+'log.amt':{t:'금액 (원)',d:'대당이면 1대당 금액, 연고정이면 1년 총액입니다.',r:'탁송·운송은 물류업체 견적(거리·차종별), 포장재는 회전 사용 시 감가로 환산하세요. 완성차 탁송은 통상 1대당 수십만원 수준.',e:'출고 탁송 350,000원'},
+'inv.cat':{t:'구분',d:'금형, 설비·지그, 검사구, 시설 등 투자 종류입니다.'},
+'inv.name':{t:'항목',d:'투자 대상의 이름입니다.'},
+'inv.amt':{t:'금액 (원)',d:'사업 시작 전(0년차)에 한 번에 지출하는 투자 금액입니다. VAT 제외.',r:'금형·설비는 제작사 견적서 기준. 신규 개발은 견적 대비 10~20% 여유를 두는 것이 안전합니다.',e:'금형 8,000만원'},
+'inv.yrs':{t:'상각년수 (년)',d:'비용으로 나눠 반영할 기간입니다. 반드시 입력하세요. 비우면 손익에 상각비가 빠져 이익이 부풀려집니다.',r:'금형 3~5년(또는 생산 수량 기준), 설비·지그 5~8년, 시설 5~10년. 사업기간(5년)을 넘기지 않는 것이 보수적입니다.',e:'5',chips:[P('3년',3),P('5년',5),P('8년',8)]},
+'dev.cat':{t:'구분',d:'설계, 시작·시험, 인증·승인, 인건비 등 개발비 종류입니다.'},
+'dev.name':{t:'항목',d:'개발 활동의 이름입니다.'},
+'dev.amt':{t:'금액 (원)',d:'사업 시작 전(0년차)에 지출하는 개발 비용입니다.',r:'설계·시험 외주는 견적서, 사내 인건비는 투입 인원 × 개월 × 월 총인건비로 계산하세요. 인증·승인 수수료는 공인기관 공지 요금 확인.',e:'강도·안전 시험 4,500만원'},
+'dev.yrs':{t:'상각년수 (년)',d:'개발비를 나눠 비용 처리할 기간입니다. 즉시 비용으로 처리하려면 1.',r:'통상 3~5년.',e:'3',chips:[P('1년',1),P('3년',3),P('5년',5)]},
+'launch.cat':{t:'구분',d:'시험생산, 교육, 초도품질, 마케팅 등 일회성 양산 준비 비용입니다.'},
+'launch.name':{t:'항목',d:'양산 전에 한 번만 드는 비용 항목입니다. 해마다 반복되는 비용은 여기가 아니라 고정 판관비·물류비에 넣으세요.'},
+'launch.amt':{t:'금액 (원)',d:'양산 개시 전에 지출하고 1년차 비용으로 반영됩니다.',r:'시험생산 재료·공임, 초기 불량 대응, 작업자 교육, 론칭 마케팅. 통상 총 투자금의 5~15%.',e:'파일럿 생산 1,800만원'}
+};
+TIPS['dev.name']=TIPS['dev.name'];
+/* ===== 유틸 ===== */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const kr=n=>{if(n===null||n===undefined||!isFinite(n))return '-';const a=Math.abs(n),s=n<0?'-':'';if(a>=1e8)return s+(a/1e8).toFixed(2)+'억';if(a>=1e4)return s+Math.round(a/1e4).toLocaleString('ko-KR')+'만';return s+Math.round(a).toLocaleString('ko-KR')};
+const krw=n=>(n===null||!isFinite(n))?'-':kr(n)+'원';
+const fnum=n=>isFinite(n)?Math.round(n).toLocaleString('ko-KR'):'-';
+const pct=(n,d=1)=>(n===null||n===undefined||!isFinite(n))?'-':(n*100).toFixed(d)+'%';
+const yr=n=>(n===null||n===undefined)?'5년 초과':n.toFixed(1)+'년';
+const COL={navy:'#1F3864',blue:'#2F5597',sky:'#8FAADC',teal:'#2E9E8F',amber:'#E0A030',red:'#C0392B',green:'#2E8B57',grey:'#8C8C8C',lg:'#E7EAF0'};
+const VERD={GO:{l:'추진 (GO)',c:'go'},CONDITIONAL:{l:'조건부 재검토',c:'cond'},NOGO:{l:'중단·재설계 (NO-GO)',c:'nogo'}};
+const getP=(o,p)=>p.split('.').reduce((a,k)=>a==null?a:a[k],o);
+const setP=(o,p,v)=>{const ks=p.split('.');const l=ks.pop();const t=ks.reduce((a,k)=>a[k],o);t[l]=v};
+
+/* ===== 상태 ===== */
+let S,R,TAB='dash',saveT;
+const KEY='autoCostFeas_v1';
+function load(){try{const j=localStorage.getItem(KEY);if(j){const o=JSON.parse(j);if(o&&o.base&&o.bom)return o}}catch(e){}return null}
+function persist(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}},400)}
+S=load()||presetStaria(); if(!S.scen)S.scen=defaultScen(); if(!S.meta.unit)S.meta.unit='대';
+
+/* ===== 표 정의 ===== */
+const TBL={
+ bom:{title:'재료비 (BOM)',cols:[{k:'cat',l:'구분',t:'sel',o:CATS,w:'118px'},{k:'code',l:'품번',t:'text',w:'88px'},{k:'name',l:'부품명',t:'text',w:'auto'},{k:'qty',l:'수량',t:'num',w:'74px'},{k:'price',l:'단가(원)',t:'won',w:'112px'},{k:'loss',l:'로스율(%)',t:'pct',w:'80px'}],calc:'재료비(원/대)',blank:()=>({cat:'구매부품',code:'',name:'',qty:'',price:'',loss:''})},
+ proc:{title:'공정별 가공·조립비',cols:[{k:'name',l:'공정명',t:'text',w:'auto'},{k:'type',l:'구분',t:'sel',o:['자체','외주'],w:'76px'},{k:'min',l:'작업시간(분)',t:'num',w:'88px'},{k:'ppl',l:'인원(명)',t:'num',w:'64px'},{k:'rate',l:'임율(원/시)',t:'won',w:'96px'},{k:'eq',l:'설비경비(원/시)',t:'won',w:'100px'},{k:'eff',l:'효율(%)',t:'pct',w:'70px'},{k:'out',l:'외주단가(원)',t:'won',w:'104px'}],calc:'공정원가(원/대)',blank:()=>({name:'',type:'자체',min:'',ppl:'',rate:'',eq:'',eff:'',out:''})},
+ log:{title:'물류비',cols:[{k:'type',l:'구분',t:'sel',o:['대당','연고정'],w:'84px'},{k:'name',l:'항목',t:'text',w:'auto'},{k:'amt',l:'금액(원)',t:'won',w:'130px'}],calc:null,blank:()=>({type:'대당',name:'',amt:''})},
+ inv:{title:'투자비 (금형·설비·지그·검사구·시설)',cols:[{k:'cat',l:'구분',t:'sel',o:['금형','설비·지그','검사구','시설','기타'],w:'104px'},{k:'name',l:'항목',t:'text',w:'auto'},{k:'amt',l:'금액(원)',t:'won',w:'130px'},{k:'yrs',l:'상각년수',t:'num',w:'74px'}],calc:'연 상각비(원)',blank:()=>({cat:'설비·지그',name:'',amt:'',yrs:5})},
+ dev:{title:'개발비 (설계·시험·인증·인건비)',cols:[{k:'cat',l:'구분',t:'sel',o:['설계·엔지니어링','시작·시험','인증·승인','인건비','기타'],w:'130px'},{k:'name',l:'항목',t:'text',w:'auto'},{k:'amt',l:'금액(원)',t:'won',w:'130px'},{k:'yrs',l:'상각년수',t:'num',w:'74px'}],calc:'연 상각비(원)',blank:()=>({cat:'설계·엔지니어링',name:'',amt:'',yrs:3})},
+ launch:{title:'양산투입경비 (일회성)',cols:[{k:'cat',l:'구분',t:'sel',o:['시험생산','교육','초도품질','마케팅','기타'],w:'104px'},{k:'name',l:'항목',t:'text',w:'auto'},{k:'amt',l:'금액(원)',t:'won',w:'130px'}],calc:null,blank:()=>({cat:'시험생산',name:'',amt:''})}
+};
+const dispVal=(kind,v)=>{if(v===''||v===null||v===undefined)return '';if(kind==='pct')return String(Math.round(num(v)*10000)/100);if(kind==='won'||kind==='num')return num(v).toLocaleString('ko-KR',{maximumFractionDigits:4});return String(v)};
+const parseVal=(kind,s)=>{s=String(s).trim();if(s==='')return '';if(kind==='text'||kind==='sel')return s;const n=parseFloat(s.replace(/,/g,''));if(!isFinite(n))return '';return kind==='pct'?n/100:n};
+function inp(path,kind,o={}){const v=getP(S,path);
+  if(kind==='sel')return `<select class="in" data-path="${path}" data-kind="sel" data-tip="${path.replace(/\.\d+/g,'')}">${o.o.map(x=>`<option${x===v?' selected':''}>${esc(x)}</option>`).join('')}</select>`;
+  return `<input class="in${kind==='text'?'':' r'}" type="text" inputmode="${kind==='text'?'text':'decimal'}" autocomplete="off" data-path="${path}" data-kind="${kind}" data-tip="${path.replace(/\.\d+/g,'')}" value="${esc(dispVal(kind,v))}"${o.ph?` placeholder="${o.ph}"`:''}>`}
+function field(label,path,kind,unit,tipKey){const k=tipKey||path;return `<div class="fld"><label>${label} <i class="q" data-tip="${k}">?</i></label><div class="fw">${inp(path,kind)}<span class="unit">${unit||''}</span></div><div class="hint" data-hint="${path}"></div></div>`}
+function tableHTML(key){const T=TBL[key];
+  const th=T.cols.map(c=>`<th style="width:${c.w}" data-tip="${key}.${c.k}">${c.l}</th>`).join('')+(T.calc?`<th class="calc" style="width:120px">${T.calc}</th>`:'')+'<th style="width:60px"></th>';
+  const rows=S[key].map((r,i)=>`<tr>${T.cols.map(c=>`<td>${inp(`${key}.${i}.${c.k}`,c.t,{o:c.o})}</td>`).join('')}${T.calc?`<td class="calc"><span data-calc="${key}.${i}">-</span></td>`:''}<td class="act"><button class="ib" data-dup="${key}.${i}" title="행 복제">⧉</button><button class="ib del" data-del="${key}.${i}" title="행 삭제">✕</button></td></tr>`).join('');
+  return `<div class="card"><div class="ch"><h3>${T.title}</h3><div class="sum" data-total="${key}"></div></div><div class="tw"><table class="tb"><thead><tr>${th}</tr></thead><tbody>${rows}</tbody></table></div><button class="btn sm" data-add="${key}">＋ 행 추가</button></div>`}
+
+/* ===== 탭 화면 ===== */
+const TABS=[['dash','📊 경영 대시보드'],['base','① 기본 가정'],['bom','② 재료비'],['proc','③ 공정 가공비'],['log','④ 물류비'],['invest','⑤ 투자·개발·양산'],['pnl','⑥ 손익분석'],['sens','⑦ 시장상황·민감도'],['team','👥 팀 검토'],['report','🖨 보고서·인쇄']];
+const HELP={
+ base:['판매 가격과 수량, 비용률, 세율, 판단 기준을 입력합니다.','노란 칸에 숫자를 넣으세요. 칸에 마우스를 올리거나 클릭하면 <b>입력 가이드와 참고 수치</b>가 나타납니다. 참고 수치 버튼을 누르면 바로 입력됩니다.'],
+ bom:['차량(또는 모재) 가격과 부품별 재료비를 입력합니다.','1대(1개)를 만드는 데 들어가는 모든 자재를 한 줄씩 넣으세요. 재료비 = 수량 × 단가 × (1 + 로스율). 행은 ＋버튼으로 자유롭게 추가·삭제할 수 있습니다.'],
+ proc:['사람·설비가 일하는 공정별 원가를 계산합니다.','자체 공정은 시간·인원·임율·설비경비를, 외주 공정은 외주단가만 입력합니다. 시간은 실측값이 가장 정확합니다.'],
+ log:['운송·포장·보관 등 물류비를 입력합니다.','"대당"은 1대 팔 때마다, "연고정"은 매년 한 번 드는 비용입니다.'],
+ invest:['금형·설비·개발비·양산 준비 비용을 입력합니다.','이 비용은 사업 시작 전(0년차)에 한 번에 지출하는 돈입니다. <b>상각년수를 꼭 입력</b>하세요(비우면 이익이 부풀려집니다).'],
+ pnl:['모든 입력의 결과를 5개년 손익·현금흐름으로 보여줍니다. (입력 불필요)','숫자를 고치려면 앞 단계 화면에서 수정하세요.'],
+ sens:['시장이 계획과 달라질 때 사업성이 어떻게 변하는지 시험합니다.','슬라이더는 입력값을 바꾸지 않고 "만약에"만 시험합니다. 보고 전 "기준(0%)으로 되돌리기"를 눌러 주세요.']};
+const helpBox=k=>HELP[k]?`<div class="help"><b>이 화면에서 할 일</b> — ${HELP[k][0]}<br><span>${HELP[k][1]}</span></div>`:'';
+function view(ks){const y0=window.scrollY;
+ const v=$('#view');let h='';
+ if(TAB==='dash')h=dashHTML();
+ else if(TAB==='base')h=helpBox('base')+baseHTML();
+ else if(TAB==='bom')h=helpBox('bom')+tableHTML('bom')+`<div class="card note"><b>재료비 구성 요약</b><div id="bomSum"></div></div>`;
+ else if(TAB==='proc')h=helpBox('proc')+tableHTML('proc')+`<div class="card note">공정원가(자체) = 작업시간(분) ÷ 60 × (인원 × 임율 + 설비경비) ÷ 효율</div>`;
+ else if(TAB==='log')h=helpBox('log')+tableHTML('log');
+ else if(TAB==='invest')h=helpBox('invest')+tableHTML('inv')+tableHTML('dev')+tableHTML('launch');
+ else if(TAB==='pnl')h=helpBox('pnl')+pnlHTML();
+ else if(TAB==='sens')h=helpBox('sens')+sensHTML();
+ else if(TAB==='team')h=teamHTML();
+ else if(TAB==='report')h=reportHTML();
+ v.innerHTML=h;update();if(TAB==='team'){teamUI();renderTeamParts()}window.scrollTo(0,ks?y0:0)}
+function baseHTML(){return `
+<div class="grid2"><div class="card"><div class="ch"><h3>프로젝트</h3></div>
+ <div class="fld"><label>프로젝트명</label><div class="fw"><input class="in" type="text" data-path="meta.name" data-kind="text" value="${esc(S.meta.name)}"></div></div>
+ <div class="fld"><label>기반 차종/아이템</label><div class="fw"><input class="in" type="text" data-path="meta.car" data-kind="text" value="${esc(S.meta.car)}"></div></div>
+ <div class="fld"><label>판매 단위 표기</label><div class="fw"><select class="in" data-path="meta.unit" data-kind="sel">${['대','개','세트'].map(x=>`<option${S.meta.unit===x?' selected':''}>${x}</option>`).join('')}</select></div></div></div>
+<div class="card"><div class="ch"><h3>판매 가정</h3></div>
+ ${field('판매단가 (VAT 제외, 1단위당)','base.price','won','원','base.price')}
+ <div class="fld"><label>연도별 판매대수 <i class="q" data-tip="base.vols">?</i></label><div class="vols">${[0,1,2,3,4].map(i=>`<div><small>${i+1}년차</small>${inp('base.vols.'+i,'num')}</div>`).join('')}</div></div>
+ <div class="two">${field('연 단가 인하율','base.erosion','pct','%')}${field('연 재료비 절감률','base.ve','pct','%')}</div>
+ ${field('연 가공비·물류비·고정비 인상률','base.infl','pct','%')}</div></div>
+<div class="grid2"><div class="card"><div class="ch"><h3>비용률</h3></div>
+ <div class="two">${field('판매수수료율','base.fee','pct','%')}${field('보증충당금율','base.warr','pct','%')}</div>
+ ${field('일반관리·판매비율 (변동)','base.sga','pct','% of 매출')}
+ ${field('연 고정 판관비','base.fixed','won','원/년')}</div>
+<div class="card"><div class="ch"><h3>재무 가정</h3></div>
+ <div class="two">${field('법인세율','base.tax','pct','%')}${field('할인율 (요구수익률)','base.wacc','pct','%')}</div>
+ ${field('운전자본율 (매출 대비)','base.wc','pct','%')}</div></div>
+<div class="card"><div class="ch"><h3>투자판단 기준 (냉정한 컷오프)</h3><span class="sub">6개 기준으로 GO / 조건부 / NO-GO를 판정합니다. 회사 기준에 맞게 조정하세요.</span></div>
+ <div class="grid3">${field('최소 NPV','crit.npv','won','원')}${field('최소 IRR','crit.irr','pct','%')}${field('최대 회수기간','crit.pb','num','년')}${field('최소 평균 영업이익률','crit.opm','pct','%')}${field('최소 대당 공헌이익률','crit.cm','pct','%')}${field('BEP÷계획대수 상한','crit.bep','pct','%')}</div>
+ <div class="rule">판정 규칙: <b>GO</b> = NPV·IRR 통과 + 6개 중 5개 이상 충족 / <b>조건부</b> = NPV 통과 + 4개 이상 / 그 외 <b>NO-GO</b></div></div>`}
+
+/* ===== 대시보드 ===== */
+function dashHTML(){return `
+<div id="warnAdj"></div>
+<div class="hero card"><div id="verdictBox"></div><div id="kpis" class="kpis"></div></div>
+<div class="grid2"><div class="card"><div class="ch"><h3>판정 체크리스트</h3><span class="sub">목표 대비 실적</span></div><div id="checks"></div></div>
+ <div class="card"><div class="ch"><h3>냉정한 진단 · 개선 방향</h3></div><div id="advice"></div></div></div>
+<div class="grid2"><div class="card"><div class="ch"><h3>대당 원가 구조 (1년차)</h3><span class="sub">판매가에서 이익까지</span></div><div id="ch_wf"></div></div>
+ <div class="card"><div class="ch"><h3>연도별 매출 · 영업이익</h3></div><div id="ch_bar"></div></div></div>
+<div class="grid2"><div class="card"><div class="ch"><h3>누적 현금흐름 (투자회수)</h3></div><div id="ch_cum"></div></div>
+ <div class="card"><div class="ch"><h3>손익분기점 (1년차 구조)</h3></div><div id="ch_bep"></div></div></div>
+<div class="grid2"><div class="card"><div class="ch"><h3>무엇이 사업성을 좌우하나 (NPV 민감도)</h3><span class="sub">각 변수 ±10% 시</span></div><div id="ch_tor"></div></div>
+ <div class="card"><div class="ch"><h3>입력 점검</h3></div><div id="warns"></div></div></div>`}
+
+/* ===== 손익분석 ===== */
+function pnlHTML(){return `<div class="card"><div class="ch"><h3>대당 손익구조 (1년차)</h3></div><div id="pnlUnit"></div></div>
+<div class="card"><div class="ch"><h3>5개년 손익 · 현금흐름 (단위: 원)</h3><span class="sub">표는 옆으로 스크롤할 수 있습니다</span></div><div class="tw" id="pnlYear"></div></div>
+<div class="card"><div class="ch"><h3>투자판단 지표</h3></div><div id="pnlKpi"></div></div>`}
+
+/* ===== 민감도 ===== */
+function sensHTML(){const sl=(k,l)=>`<div class="sl"><label>${l} <i class="q" data-tip="adj.${k}">?</i></label><input type="range" min="-0.4" max="0.4" step="0.01" data-adj="${k}" value="${S.adj[k]}"><b data-adjv="${k}"></b></div>`;
+ return `<div class="card"><div class="ch"><h3>시장상황 시나리오 (만약에…)</h3><div class="btns"><button class="btn sm" data-sc="pess">비관</button><button class="btn sm" data-sc="zero">기준(0%)으로 되돌리기</button><button class="btn sm" data-sc="opt">낙관</button></div></div>
+ <div class="sliders">${sl('price','판매단가')}${sl('vol','판매대수')}${sl('mat','재료비')}${sl('inv','투자·개발비')}</div>
+ <div id="sensNow" class="kpis"></div><div class="rule">비관 = 단가 −5% · 대수 −20% · 재료비 +5% · 투자 +10% / 낙관 = 반대 방향. 슬라이더를 움직이면 다른 모든 화면(대시보드·보고서)에도 즉시 반영됩니다.</div></div>
+ <div class="grid2"><div class="card"><div class="ch"><h3>NPV 한계점 (한 변수만 변할 때)</h3></div><div id="be"></div></div>
+ <div class="card"><div class="ch"><h3>영향도 순위 (±10%)</h3></div><div id="ch_tor2"></div></div></div>
+ <div class="card"><div class="ch"><h3>판매단가 × 판매대수 NPV 지도</h3><span class="sub">초록=플러스, 빨강=마이너스 (현재 시나리오 기준)</span></div><div id="heat" class="tw"></div></div>
+ <div class="card"><div class="ch"><h3>시나리오 비교표</h3><span class="sub">조정률은 입력값 기준(%). 직접 수정·추가 가능</span></div><div class="tw"><table class="tb" id="scTbl"></table></div><button class="btn sm" data-addsc="1">＋ 시나리오 추가</button></div>`}
+
+/* ===== 보고서 ===== */
+function reportHTML(){return `<div class="noprint help"><b>경영자 보고용 화면</b> — 아래 내용이 그대로 A4로 인쇄됩니다. <button class="btn pri sm" id="btnPrint2">🖨 인쇄 / PDF 저장</button><br><span>인쇄 창이 열리지 않으면 키보드 <b>Ctrl+P</b>(Mac: ⌘P)를 누르세요. 인쇄 대상에서 "PDF로 저장"을 선택하면 PDF 파일이 됩니다. 배경색이 보이도록 "배경 그래픽" 옵션을 켜 주세요.</span>
+ <div class="two" style="margin-top:8px"><div class="fld"><label>작성자</label><div class="fw"><input class="in" type="text" data-path="meta.author" data-kind="text" value="${esc(S.meta.author)}"></div></div><div class="fld"><label>검토자</label><div class="fw"><input class="in" type="text" data-path="meta.reviewer" data-kind="text" value="${esc(S.meta.reviewer)}"></div></div></div></div>
+<div id="rep" class="rep"></div>`}
+function repFill(){const U=S.meta.unit;const d=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});const v=VERD[R.verdict];const u=R.u;
+ const rows=(items)=>items.map(([a,b,c])=>`<tr><td>${a}</td><td class="r">${b}</td><td class="r">${c??''}</td></tr>`).join('');
+ const head=`<div class="rhead"><div><div class="rtt">${esc(S.meta.name)} · 사업성 검토 보고</div><div class="rs">기반: ${esc(S.meta.car)} | 분석기간 5년 | 금액 단위: 원(VAT 제외)</div></div><div class="rm">작성일 ${d}<br>작성 ${esc(S.meta.author||'-')} / 검토 ${esc(S.meta.reviewer||'-')}</div></div>`;
+ const adjw=(adjActive()?`<div class="warn">⚠ 시장 시나리오 조정값이 적용된 결과입니다. (${adjText()})</div>`:'');
+ $('#rep').innerHTML=head+adjw+`
+ <div class="rv ${v.c}"><div class="rvl">종합 판정</div><div class="rvt">${v.l}</div><div class="rvd">${verdictLine()}</div></div>
+ <div class="kpis rk">${kpiTiles()}</div>
+ <h4>1. 핵심 판단 근거</h4><div id="r_checks">${checksHTML()}</div>
+ <div class="rg"><div><h4>2. 대당 원가 구조 (1년차)</h4>${wfSVG()}</div><div><h4>3. 연도별 매출·영업이익</h4>${barSVG()}</div></div>
+ <div class="rg"><div><h4>4. 누적 현금흐름</h4>${cumSVG()}</div><div><h4>5. 손익분기점</h4>${bepSVG()}</div></div>
+ <div class="pb"></div>
+ <h4>6. 5개년 요약 (단위: 원)</h4><table class="tb rtb"><thead><tr><th></th><th>0년차</th>${R.Y.map(y=>`<th>${y.t}년차</th>`).join('')}</tr></thead><tbody>
+  <tr><td>판매수량 (${U})</td><td></td>${R.Y.map(y=>`<td class="r">${fnum(y.units)}</td>`).join('')}</tr>
+  <tr><td>매출액</td><td></td>${R.Y.map(y=>`<td class="r">${fnum(y.rev)}</td>`).join('')}</tr>
+  <tr><td>영업이익</td><td></td>${R.Y.map(y=>`<td class="r ${y.ebit<0?'neg':''}">${fnum(y.ebit)}</td>`).join('')}</tr>
+  <tr><td>영업이익률</td><td></td>${R.Y.map(y=>`<td class="r">${pct(y.opm)}</td>`).join('')}</tr>
+  <tr><td>순현금흐름(FCF)</td>${R.flows.map(f=>`<td class="r ${f<0?'neg':''}">${fnum(f)}</td>`).join('')}</tr>
+  <tr><td>누적 FCF</td>${R.cum.map(f=>`<td class="r ${f<0?'neg':''}">${fnum(f)}</td>`).join('')}</tr></tbody></table>
+ <div class="rg"><div><h4>7. 대당 손익 (1년차)</h4><table class="tb rtb"><tbody>${rows([['판매단가',fnum(u.price),'100%'],['재료비',fnum(u.mat),pct(u.mat/u.price)],['가공·조립비',fnum(u.proc),pct(u.proc/u.price)],['물류비',fnum(u.log),pct(u.log/u.price)],['제조원가',fnum(u.cost),pct(u.cost/u.price)],['수수료·보증·판관(변동)',fnum(u.var),pct(u.var/u.price)],['공헌이익',fnum(u.cm),pct(u.cmr)]])}</tbody></table></div>
+ <div><h4>8. 투자 규모</h4><table class="tb rtb"><tbody>${rows([['투자비 (금형·설비 등)',fnum(R.invTot*(1+S.adj.inv)),''],['개발비',fnum(R.devTot*(1+S.adj.inv)),''],['양산투입경비',fnum(R.launchTot),''],['총 투자금',fnum(R.invest),'']])}</tbody></table>
+ <h4>9. 핵심 가정</h4><table class="tb rtb"><tbody>${rows([['판매단가 / 연 인하율',fnum(S.base.price),pct(S.base.erosion)],['판매대수 (1~5년)',S.base.vols.map(fnum).join(' / '),''],['수수료·보증·판관',pct(S.base.fee)+' / '+pct(S.base.warr)+' / '+pct(S.base.sga),''],['법인세율 / 할인율',pct(S.base.tax),pct(S.base.wacc)]])}</tbody></table></div></div>
+ <h4>10. 위험 점검 (NPV 한계점)</h4><div>${beHTML()}</div>
+ <div class="rg"><div><h4>11. 영향도 순위 (±10%)</h4>${torSVG(true)}</div><div><h4>12. 단가×대수 NPV 지도</h4>${heatHTML()}</div></div>
+ <h4>13. 팀 검토 의견</h4><div id="r_rev">${reviewsHTML(true)}</div>
+ <div class="foot">※ 본 보고서는 입력된 가정에 기반한 계산 결과입니다. 5년 이후 잔존가치·운전자본 회수 미반영, 법인세는 이익 발생연도에만 과세(보수적). 모든 가정은 근거 자료로 검증이 필요합니다.</div>`}
+
+/* ===== 공통 조각 ===== */
+function adjActive(){return Object.values(S.adj).some(v=>Math.abs(v)>1e-9)}
+function adjText(){const a=S.adj,f=v=>(v>=0?'+':'')+(v*100).toFixed(0)+'%';return `단가 ${f(a.price)} · 대수 ${f(a.vol)} · 재료비 ${f(a.mat)} · 투자 ${f(a.inv)}`}
+function verdictLine(){const f=R.fail;if(R.verdict==='GO')return `6개 기준 중 ${R.cnt}개 충족. 현재 가정으로는 추진 가능하나, 아래 위험 점검의 여유폭을 확인하세요.`;
+ if(R.verdict==='CONDITIONAL')return `6개 기준 중 ${R.cnt}개 충족 (미충족: ${f.join(', ')}). 미충족 항목을 보완하는 조건으로 재검토하세요.`;
+ return (R.npv>=0?`NPV는 플러스이나 `:`현 가정으로는 투자금을 회수하지 못하며 `)+`6개 기준 중 ${R.cnt}개만 충족 (미충족: ${f.join(', ')}). 가격·원가·물량 구조를 바꾸지 않으면 추진하지 않는 것이 맞습니다.`}
+function kpiTiles(){const t=(l,v,s='')=>`<div class="kpi"><div class="kl">${l}</div><div class="kv">${v}</div><div class="ks">${s}</div></div>`;
+ return t('총 투자금',krw(R.invest),'투자+개발+양산투입')+t('5년 누적 영업이익',krw(R.ebit5),'평균 이익률 '+pct(R.opm5))+t('NPV',krw(R.npv),'할인율 '+pct(S.base.wacc,0))+t('IRR',R.irr===null?'산출불가':pct(R.irr),'기준 '+pct(S.crit.irr,0)+' 이상')+t('투자회수기간',yr(R.pb),'기준 '+S.crit.pb+'년 이내')+t('손익분기 판매량',R.bep===null?'공헌이익 음수':fnum(R.bep)+S.meta.unit,'계획 1년차 '+fnum(R.Y[0].units)+S.meta.unit)}
+function checksHTML(){return R.checks.map(c=>{const fv=(v)=>c.f==='won'?krw(v):c.f==='pct'?pct(v):c.f==='yr'?yr(v):'-';
+ let ratio=0;if(c.k==='NPV')ratio=c.tgt===0?(c.act>0?1:0):Math.max(0,Math.min(1,c.act/c.tgt));else if(c.dir==='≥')ratio=c.act===null||c.tgt===0?0:Math.max(0,Math.min(1,c.act/c.tgt));else ratio=c.act===null?0:(c.act<=0?1:Math.max(0,Math.min(1,c.tgt/c.act)));
+ return `<div class="ck ${c.ok?'ok':'bad'}"><div class="ckh"><span>${c.label}</span><b>${c.ok?'충족':'미달'}</b></div><div class="bar"><i style="width:${(ratio*100).toFixed(0)}%"></i></div><div class="ckv">실적 ${fv(c.act)} <span>/ 기준 ${c.dir} ${fv(c.tgt)}</span></div></div>`}).join('')}
+function beHTML(){const items=[['price','판매단가'],['vol','판매대수'],['mat','재료비']];
+ return '<table class="tb rtb"><tbody>'+items.map(([k,l])=>{const b=breakEven(S,k);let txt='-';const cur=S.adj[k];
+  if(b===null)txt='±범위 내 해 없음';else{const d=b-cur;const dir=k==='mat'?(d>0?'상승':'하락'):(d>0?'증가':'감소');const sev=(k==='mat'?d>0:d<0)?'여유':'필요';txt=`${Math.abs(d*100).toFixed(1)}% ${dir} 시 NPV=0 <span class="tag ${sev==='여유'?'ok':'bad'}">${sev==='여유'?'허용 여유':'개선 필요'}</span>`}
+  return `<tr><td>${l}</td><td>${txt}</td></tr>`}).join('')+`<tr><td>목표 이익률 달성 필요 단가</td><td>${R.req===null?'-':krw(R.req)+(R.reqUp!==null?` <span class="tag ${R.reqUp>0?'bad':'ok'}">현재 대비 ${(R.reqUp*100>=0?'+':'')+(R.reqUp*100).toFixed(1)}%</span>`:'')}</td></tr></tbody></table>`}
+
+/* ===== SVG 차트 ===== */
+function ticks(min,max,n=5){if(min===max)max=min+1;const sp=max-min,s0=sp/n,mg=Math.pow(10,Math.floor(Math.log10(s0))),nm=s0/mg,st=(nm<1.5?1:nm<3?2:nm<7?5:10)*mg;const lo=Math.floor(min/st)*st,hi=Math.ceil(max/st)*st,t=[];for(let v=lo;v<=hi+st/2;v+=st)t.push(v);return t}
+function frame(W,H,body){return `<svg class="chart" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="Noto Sans KR,Malgun Gothic,sans-serif">${body}</svg>`}
+function axisY(t,y,m,W){return t.map(v=>`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="${v===0?'#555':COL.lg}" stroke-width="${v===0?1.2:1}"/><text x="${m.l-6}" y="${y(v)+4}" text-anchor="end" font-size="10" fill="#666">${kr(v)}</text>`).join('')}
+function barSVG(){const W=560,H=270,m={l:56,r:10,t:26,b:30};const cats=R.Y.map(y=>y.t+'년차');const sr=[{n:'매출액',c:COL.sky,v:R.Y.map(y=>y.rev)},{n:'영업이익',c:COL.navy,v:R.Y.map(y=>y.ebit)},{n:'FCF',c:COL.teal,v:R.Y.map(y=>y.fcf)}];
+ const all=sr.flatMap(s=>s.v).concat([0]);const t=ticks(Math.min(...all),Math.max(...all));const y=v=>m.t+(H-m.t-m.b)*(1-(v-t[0])/(t[t.length-1]-t[0]));
+ const gw=(W-m.l-m.r)/cats.length,bw=gw*0.8/sr.length;let b=axisY(t,y,m,W);
+ cats.forEach((c,i)=>{sr.forEach((s,j)=>{const v=s.v[i],x=m.l+gw*i+gw*0.1+bw*j;b+=`<rect x="${x.toFixed(1)}" y="${Math.min(y(v),y(0)).toFixed(1)}" width="${(bw-2).toFixed(1)}" height="${Math.max(1,Math.abs(y(v)-y(0))).toFixed(1)}" fill="${s.c}" rx="2"/>`});b+=`<text x="${m.l+gw*i+gw/2}" y="${H-10}" text-anchor="middle" font-size="11" fill="#444">${c}</text>`});
+ sr.forEach((s,j)=>{b+=`<rect x="${m.l+j*82}" y="6" width="10" height="10" fill="${s.c}" rx="2"/><text x="${m.l+j*82+14}" y="15" font-size="11" fill="#444">${s.n}</text>`});return frame(W,H,b)}
+function cumSVG(){const W=560,H=270,m={l:56,r:16,t:22,b:30};const v=R.cum;const t=ticks(Math.min(...v,0),Math.max(...v,0));const y=q=>m.t+(H-m.t-m.b)*(1-(q-t[0])/(t[t.length-1]-t[0]));const x=i=>m.l+(W-m.l-m.r)*i/5;
+ let b=axisY(t,y,m,W);const pts=v.map((q,i)=>`${x(i).toFixed(1)},${y(q).toFixed(1)}`).join(' ');
+ b+=`<polygon points="${x(0)},${y(0)} ${pts} ${x(5)},${y(0)}" fill="${COL.blue}" opacity=".12"/><polyline points="${pts}" fill="none" stroke="${COL.blue}" stroke-width="2.5"/>`;
+ v.forEach((q,i)=>{b+=`<circle cx="${x(i)}" cy="${y(q)}" r="3.5" fill="${q<0?COL.red:COL.green}"/><text x="${x(i)}" y="${y(q)+(q<0?16:-8)}" text-anchor="middle" font-size="10" fill="#333">${kr(q)}</text><text x="${x(i)}" y="${H-10}" text-anchor="middle" font-size="11" fill="#444">${i}년차</text>`});
+ if(R.pb!==null){const px=x(R.pb);b+=`<line x1="${px}" x2="${px}" y1="${m.t}" y2="${H-m.b}" stroke="${COL.green}" stroke-dasharray="4 3"/><text x="${px+4}" y="${m.t+10}" font-size="11" fill="${COL.green}" font-weight="700">회수 ${R.pb.toFixed(1)}년</text>`}
+ else b+=`<text x="${W-m.r}" y="${m.t+10}" text-anchor="end" font-size="11" fill="${COL.red}" font-weight="700">5년 내 회수 불가</text>`;return frame(W,H,b)}
+function wfSVG(){const u=R.u;const it=[['판매단가',u.price,'t'],['기반차량',-u.matBase,'d'],['부품·자재',-(u.mat-u.matBase),'d'],['가공비',-u.proc,'d'],['물류비',-u.log,'d'],['수수료·보증·판관',-u.var,'d'],['공헌이익',u.cm,'t']];
+ const W=560,H=290,m={l:56,r:10,t:22,b:42};let run=0,b='';const lv=[];it.forEach(([l,v,t],i)=>{if(t==='t'){lv.push([0,v,l,v,t]);run=v}else{lv.push([run,run+v,l,v,t]);run+=v}});lv[0][0]=0;
+ const lo=Math.min(0,...lv.map(a=>Math.min(a[0],a[1]))),hi=Math.max(...lv.map(a=>Math.max(a[0],a[1])));const t=ticks(lo,hi);const y=q=>m.t+(H-m.t-m.b)*(1-(q-t[0])/(t[t.length-1]-t[0]));b+=axisY(t,y,m,W);
+ const gw=(W-m.l-m.r)/it.length;lv.forEach((a,i)=>{const x=m.l+gw*i+gw*.14,w=gw*.72;const top=Math.max(a[0],a[1]),bot=Math.min(a[0],a[1]);const col=a[4]==='t'?(i===0?COL.navy:(a[3]>=0?COL.green:COL.red)):COL.amber;
+  b+=`<rect x="${x}" y="${y(top)}" width="${w}" height="${Math.max(1.5,y(bot)-y(top))}" fill="${col}" rx="2"/><text x="${x+w/2}" y="${y(top)-4}" text-anchor="middle" font-size="10" fill="#333">${kr(a[3])}</text>`;
+  const lab=a[2],parts=lab.length>5?[lab.slice(0,Math.ceil(lab.length/2)),lab.slice(Math.ceil(lab.length/2))]:[lab];parts.forEach((p,k)=>b+=`<text x="${x+w/2}" y="${H-26+k*12}" text-anchor="middle" font-size="10" fill="#444">${p}</text>`)});return frame(W,H,b)}
+function bepSVG(){const W=560,H=270,m={l:56,r:16,t:22,b:34};const y1=R.Y[0],cm=R.u.cm,fx=y1.fixTot;const mx=Math.max(y1.units*1.8,(R.bep||0)*1.4,10);const pf=q=>q*cm-fx;
+ const vals=[pf(0),pf(mx)];const t=ticks(Math.min(...vals,0),Math.max(...vals,0));const y=q=>m.t+(H-m.t-m.b)*(1-(q-t[0])/(t[t.length-1]-t[0]));const x=q=>m.l+(W-m.l-m.r)*q/mx;
+ let b=axisY(t,y,m,W);b+=`<polyline points="${x(0)},${y(pf(0))} ${x(mx)},${y(pf(mx))}" fill="none" stroke="${COL.blue}" stroke-width="2.5"/>`;
+ [0,.25,.5,.75,1].forEach(f=>b+=`<text x="${x(mx*f)}" y="${H-16}" text-anchor="middle" font-size="10" fill="#555">${fnum(mx*f)}</text>`);b+=`<text x="${W/2}" y="${H-3}" text-anchor="middle" font-size="10" fill="#777">연간 판매량 (${S.meta.unit})</text>`;
+ b+=`<line x1="${x(y1.units)}" x2="${x(y1.units)}" y1="${m.t}" y2="${H-m.b}" stroke="${COL.navy}" stroke-dasharray="4 3"/><text x="${Math.min(x(y1.units)+5,W-150)}" y="${m.t+10}" font-size="11" fill="${COL.navy}">1년차 계획 ${fnum(y1.units)}${S.meta.unit} → 영업이익 ${kr(pf(y1.units))}</text><circle cx="${x(y1.units)}" cy="${y(pf(y1.units))}" r="4.5" fill="${pf(y1.units)<0?COL.red:COL.green}"/>`;
+ if(R.bep!==null&&R.bep<=mx)b+=`<circle cx="${x(R.bep)}" cy="${y(0)}" r="5" fill="${COL.amber}" stroke="#fff"/><text x="${x(R.bep)-8}" y="${y(0)+20}" text-anchor="end" font-size="11" font-weight="700" fill="#8a5a00">손익분기 ${fnum(R.bep)}${S.meta.unit}</text>`;
+ else if(R.bep===null)b+=`<text x="${W/2}" y="${m.t+26}" text-anchor="middle" font-size="12" fill="${COL.red}">대당 공헌이익이 음수 - 팔수록 손실</text>`;return frame(W,H,b)}
+function tornadoData(){const base=R.npv,items=[['판매단가','price'],['판매대수','vol'],['재료비','mat'],['투자·개발비','inv']];
+ return items.map(([l,k])=>{const f=d=>{const a={...S.adj};a[k]+=d;return calc(S,a).npv};return{l,lo:f(-.1),hi:f(.1)}}).map(o=>({...o,sw:Math.abs(o.hi-o.lo)})).sort((a,b)=>b.sw-a.sw)}
+function torSVG(small){const W=560,H=small?210:230,m={l:92,r:20,t:26,b:26};const base=R.npv,d=tornadoData();const all=d.flatMap(o=>[o.lo,o.hi]).concat([base]);const t=ticks(Math.min(...all),Math.max(...all),4);const x=v=>m.l+(W-m.l-m.r)*(v-t[0])/(t[t.length-1]-t[0]);const bh=(H-m.t-m.b)/d.length*.6;
+ let b=t.map(v=>`<line x1="${x(v)}" x2="${x(v)}" y1="${m.t}" y2="${H-m.b}" stroke="${COL.lg}"/><text x="${x(v)}" y="${H-10}" text-anchor="middle" font-size="10" fill="#666">${kr(v)}</text>`).join('');
+ d.forEach((o,i)=>{const cy=m.t+(H-m.t-m.b)/d.length*(i+.5);const a=Math.min(o.lo,o.hi),z=Math.max(o.lo,o.hi);b+=`<text x="${m.l-8}" y="${cy+4}" text-anchor="end" font-size="11" fill="#333">${o.l}</text>`;
+  const seg=(v1,v2,c)=>`<rect x="${x(Math.min(v1,v2))}" y="${cy-bh/2}" width="${Math.max(1,Math.abs(x(v2)-x(v1)))}" height="${bh}" fill="${c}" rx="2"/>`;
+  b+=seg(base,o.lo,o.lo<base?COL.red:COL.green)+seg(base,o.hi,o.hi<base?COL.red:COL.green);
+  b+=`<text x="${x(a)-4}" y="${cy+4}" text-anchor="end" font-size="10" fill="#444">${kr(a)}</text><text x="${x(z)+4}" y="${cy+4}" font-size="10" fill="#444">${kr(z)}</text>`});
+ b+=`<line x1="${x(base)}" x2="${x(base)}" y1="${m.t-4}" y2="${H-m.b}" stroke="#222" stroke-width="1.5"/><text x="${x(base)}" y="${m.t-8}" text-anchor="middle" font-size="10" fill="#222">현재 NPV ${kr(base)}</text>`;return frame(W,H,b)}
+function heatHTML(){const ps=[-.15,-.10,-.05,0,.05,.10,.15],vs=[-.3,-.2,-.1,0,.1,.2,.3];const g=vs.map(v=>ps.map(p=>{const a={...S.adj};a.price+=p;a.vol+=v;return calc(S,a).npv}));const mx=Math.max(...g.flat().map(Math.abs))||1;
+ const cell=(n)=>{const k=Math.min(1,Math.abs(n)/mx);const c=n>=0?`rgba(46,139,87,${.12+.6*k})`:`rgba(192,57,43,${.12+.6*k})`;return `background:${c}`};
+ return `<table class="heat"><thead><tr><th>대수＼단가</th>${ps.map(p=>`<th>${p>0?'+':''}${p*100}%</th>`).join('')}</tr></thead><tbody>${vs.map((v,i)=>`<tr><th>${v>0?'+':''}${v*100}%</th>${g[i].map((n,j)=>`<td style="${cell(n)}${(i===3&&j===3)?';outline:2px solid #222':''}">${kr(n)}</td>`).join('')}</tr>`).join('')}</tbody></table>`}
+
+/* ===== 갱신 ===== */
+function update(){R=calc(S);const pn=$('#pn');if(pn&&document.activeElement!==pn)pn.value=S.meta.name;
+ const v=VERD[R.verdict];const tb=$('#topKpi');tb.innerHTML=`<span class="chip ${v.c}">${v.l}</span><span>NPV <b>${krw(R.npv)}</b></span><span>IRR <b>${R.irr===null?'-':pct(R.irr)}</b></span><span>영업이익률 <b>${pct(R.opm5)}</b></span><span>회수 <b>${yr(R.pb)}</b></span>${adjActive()?'<span class="chip warnc">시나리오 적용중</span>':''}<span id="teamChip"></span>`;update_top();
+ TABS.forEach(([k])=>{const el=$(`[data-tab="${k}"] .dot`);if(!el)return;const ok={base:num(S.base.price)>0&&S.base.vols.some(x=>num(x)>0),bom:R.matTot>0,proc:R.procTot>0,log:S.log.some(r=>num(r.amt)>0),invest:R.invTot+R.devTot>0}[k];el.style.display=ok===undefined?'none':'inline-block';el.className='dot '+(ok?'ok':'no')});
+ // 행 계산
+ $$('[data-calc]').forEach(el=>{const [k,i]=el.dataset.calc.split('.');let val=null;if(k==='bom')val=R.matRow[i];else if(k==='proc')val=R.procRow[i];else if(k==='inv')val=R.invRows[i]?.dep;else if(k==='dev')val=R.devRows[i]?.dep;el.textContent=(val===null||val===undefined)?'-':fnum(val)});
+ $$('[data-total]').forEach(el=>{const k=el.dataset.total;let t='';if(k==='bom')t=`재료비 합계 <b>${fnum(R.matTot)}</b> 원/${S.meta.unit}`;else if(k==='proc')t=`가공·조립비 합계 <b>${fnum(R.procTot)}</b> 원/${S.meta.unit}`;else if(k==='log')t=`대당 <b>${fnum(R.logUnit)}</b>원 · 연고정 <b>${fnum(R.logFix)}</b>원/년`;else if(k==='inv')t=`총액 <b>${fnum(R.invTot)}</b>원 · 연 상각 <b>${fnum(R.invRows.reduce((a,r)=>a+r.dep,0))}</b>원`+(R.noYrs>0?` <span class="tag bad">상각년수 미입력 ${kr(R.noYrs)}</span>`:'');else if(k==='dev')t=`총액 <b>${fnum(R.devTot)}</b>원 · 연 상각 <b>${fnum(R.devRows.reduce((a,r)=>a+r.dep,0))}</b>원`;else if(k==='launch')t=`총액 <b>${fnum(R.launchTot)}</b>원`;el.innerHTML=t});
+ $$('.in[data-kind="won"]').forEach(el=>{const h=el.closest('.fld')?.querySelector('.hint');if(h&&h.dataset.hint===el.dataset.path){const n=num(getP(S,el.dataset.path));h.textContent=n>=10000?'≈ '+krw(n):''}});
+ const bs=$('#bomSum');if(bs)bs.innerHTML=CATS.map(c=>`<div class="srow"><span>${c}</span><b>${fnum(R.mat[c])}</b><i style="width:${R.matTot?R.mat[c]/R.matTot*100:0}%"></i><em>${pct(R.matTot?R.mat[c]/R.matTot:0)}</em></div>`).join('')+`<div class="srow tot"><span>합계 (원/${S.meta.unit})</span><b>${fnum(R.matTot)}</b></div>`;
+ const set=(id,h)=>{const e=document.getElementById(id);if(e)e.innerHTML=h};
+ if(TAB==='dash'){const vd=VERD[R.verdict];set('verdictBox',`<div class="rv ${vd.c}"><div class="rvl">종합 판정</div><div class="rvt">${vd.l}</div><div class="rvd">${verdictLine()}</div><div class="rvc">충족 ${R.cnt} / 6</div></div>`);set('kpis',kpiTiles());set('checks',checksHTML());set('advice',beHTML()+adviceExtra());set('ch_wf',wfSVG());set('ch_bar',barSVG());set('ch_cum',cumSVG());set('ch_bep',bepSVG());set('ch_tor',torSVG());set('warns',warnHTML());set('warnAdj',adjActive()?`<div class="warn">⚠ 시장 시나리오 조정값이 적용 중입니다 (${adjText()}). "⑦ 시장상황·민감도"에서 되돌릴 수 있습니다.</div>`:'')}
+ if(TAB==='pnl')pnlFill();
+ if(TAB==='sens')sensFill();
+ if(TAB==='report')repFill();
+ persist();teamPush()}
+function adviceExtra(){const a=[];const u=R.u;
+ if(u.cm<=0)a.push('대당 공헌이익이 0 이하입니다. 판매할수록 손실이므로 판매가 인상 또는 재료비 절감이 먼저입니다.');
+ const sh=u.price?u.matBase/u.price:0;if(sh>.7&&u.matBase>0)a.push(`기반차량 가격이 판매가의 ${pct(sh,0)}를 차지합니다. 차량 매입가 협상·공급 조건이 사업성을 좌우합니다.`);
+ if(R.bepr!==null&&R.bepr>S.crit.bep)a.push(`1년차 손익분기 판매량이 계획의 ${pct(R.bepr,0)}로 안전율 기준(${pct(S.crit.bep,0)})을 넘습니다. 초기 수요 확보 근거가 필요합니다.`);
+ if(R.invest>0&&R.Y[0].fcf<0)a.push('1년차 현금흐름이 마이너스입니다. 초기 자금 조달 계획(운전자금)을 확인하세요.');
+ return a.length?'<ul class="adv">'+a.map(x=>`<li>${x}</li>`).join('')+'</ul>':''}
+function warnHTML(){const w=[];if(num(S.base.price)<=0)w.push('판매단가가 입력되지 않았습니다.');if(!S.base.vols.some(x=>num(x)>0))w.push('판매대수가 입력되지 않았습니다.');if(R.matTot<=0)w.push('재료비(BOM)가 비어 있습니다.');if(R.procTot<=0)w.push('공정 가공비가 비어 있습니다 (외주만 있다면 정상).');
+ if(R.noYrs>0)w.push(`투자·개발비 중 ${krw(R.noYrs)}의 상각년수가 비어 있어 이익이 과대 계산됩니다.`);
+ if(R.matTot>0&&R.u.price>0&&R.u.cost>R.u.price)w.push('제조원가가 판매단가보다 큽니다. 입력(단위·수량)을 확인하세요.');
+ const oth=Math.abs(R.u.matOther);if(oth>1)w.push('구분이 지정되지 않은 재료비 항목이 있습니다. 원가구조 그래프의 "부품·자재"에 합산됩니다.');
+ return w.length?'<ul class="adv warnl">'+w.map(x=>`<li>${x}</li>`).join('')+'</ul>':'<div class="okmsg">✓ 입력 점검 항목에 문제가 없습니다.</div>'}
+function pnlFill(){const u=R.u,U=S.meta.unit;const rw=(l,v,b)=>`<tr class="${b?'b':''}"><td>${l}</td><td class="r">${fnum(v)}</td><td class="r">${pct(u.price?v/u.price:0)}</td></tr>`;
+ $('#pnlUnit').innerHTML=`<table class="tb"><thead><tr><th>항목</th><th>원/${U}</th><th>판매가 대비</th></tr></thead><tbody>${rw('판매단가',u.price,1)}${rw('　기반차량 재료비',u.matBase)}${rw('　신규개발부품',u.matDev)}${rw('　구매부품',u.matBuy)}${rw('　부자재·소모품',u.matSub)}${rw('재료비 합계',u.mat,1)}${rw('가공·조립비',u.proc)}${rw('물류비',u.log)}${rw('제조원가',u.cost,1)}${rw('매출총이익',u.gp,1)}${rw('　판매수수료',u.fee)}${rw('　보증충당금',u.warr)}${rw('　일반관리·판매비(변동)',u.sga)}${rw('공헌이익',u.cm,1)}</tbody></table>`;
+ const Y=R.Y,row=(l,f,b,neg)=>`<tr class="${b?'b':''}"><td>${l}</td><td class="r">${f===null?'':''}</td>${Y.map(y=>{const v=f(y);return `<td class="r ${(neg&&v<0)?'neg':''}">${typeof v==='number'?(v!==0&&Math.abs(v)<1&&v!==Math.round(v)?v.toFixed(3):fnum(v)):v}</td>`}).join('')}<td class="r">${b===2?'':''}</td></tr>`;
+ const lines=[['판매수량('+U+')',y=>y.units],['판매단가',y=>y.price],['매출액',y=>y.rev,1],['재료비',y=>y.mat],['가공·조립비',y=>y.proc],['물류비(변동)',y=>y.log],['매출원가',y=>y.cogs,1],['매출총이익',y=>y.gp,1,1],['판매수수료',y=>y.fee],['보증충당금',y=>y.warr],['일반관리·판매비',y=>y.sga],['고정 판관비',y=>y.fixSga],['고정 물류비',y=>y.fixLog],['상각비(투자+개발)',y=>y.dep],['양산투입경비',y=>y.launch],['영업이익',y=>y.ebit,1,1],['영업이익률',y=>pct(y.opm)],['법인세',y=>y.tax],['순이익',y=>y.ni,1,1],['(+) 상각비',y=>y.dep],['(+) 양산투입경비 환입',y=>y.launch],['(−) 운전자본 증가',y=>-y.dwc,0,1],['순현금흐름(FCF)',y=>y.fcf,1,1]];
+ $('#pnlYear').innerHTML=`<table class="tb"><thead><tr><th>항목</th><th>0년차(투자)</th>${Y.map(y=>`<th>${y.t}년차</th>`).join('')}</tr></thead><tbody>`+lines.map(([l,f,b,n])=>`<tr class="${b?'b':''}"><td>${l}</td><td class="r"></td>${Y.map(y=>{const v=f(y);return `<td class="r ${(n&&typeof v==='number'&&v<0)?'neg':''}">${typeof v==='number'?fnum(v):v}</td>`}).join('')}</tr>`).join('')+`<tr class="b"><td>투자·개발·양산투입 (0년차)</td><td class="r neg">${fnum(-R.invest)}</td>${Y.map(()=>'<td></td>').join('')}</tr><tr class="b"><td>누적 FCF</td>${R.cum.map(v=>`<td class="r ${v<0?'neg':''}">${fnum(v)}</td>`).join('')}</tr><tr><td>현재가치(PV)</td>${R.pv.map(v=>`<td class="r">${fnum(v)}</td>`).join('')}</tr></tbody></table>`;
+ const kp=(l,v,n)=>`<tr><td>${l}</td><td class="r"><b>${v}</b></td><td class="nt">${n||''}</td></tr>`;
+ $('#pnlKpi').innerHTML=`<table class="tb"><tbody>${kp('총 투자금',krw(R.invest))}${kp('5년 누적 매출',krw(R.rev5))}${kp('5년 누적 영업이익',krw(R.ebit5))}${kp('5년 평균 영업이익률',pct(R.opm5))}${kp('NPV',krw(R.npv),'5년 후 잔존가치·운전자본 회수 미반영(보수적)')}${kp('IRR',R.irr===null?'산출불가':pct(R.irr))}${kp('투자회수기간',yr(R.pb))}${kp('할인 투자회수기간',yr(R.dpb))}${kp('1년차 손익분기 판매량',R.bep===null?'공헌이익 음수':fnum(R.bep)+U,'고정비 ÷ 대당 공헌이익')}${kp('BEP ÷ 계획대수',pct(R.bepr,0))}${kp('투자금 회수 필요 누적 판매량',R.paybackUnits===null?'-':fnum(R.paybackUnits)+U,'총투자금 ÷ 대당 공헌이익(세전)')}${kp('목표 이익률 달성 필요 단가',R.req===null?'-':krw(R.req),R.reqUp===null?'':'현재 대비 '+(R.reqUp>=0?'+':'')+(R.reqUp*100).toFixed(1)+'%')}</tbody></table>`}
+function sensFill(){const f=v=>(v>=0?'+':'')+(v*100).toFixed(0)+'%';$$('[data-adjv]').forEach(e=>e.textContent=f(S.adj[e.dataset.adjv]));
+ $('#sensNow').innerHTML=kpiTiles();$('#be').innerHTML=beHTML();$('#ch_tor2').innerHTML=torSVG();$('#heat').innerHTML=heatHTML();
+ const rows=S.scen.map((s,i)=>{const r=calc(S,{price:num(s.p),vol:num(s.v),mat:num(s.m),inv:num(s.i)});const v=VERD[r.verdict];
+  return `<tr><td>${inp(`scen.${i}.name`,'text')}</td>${['p','v','m','i'].map(k=>`<td>${inp(`scen.${i}.${k}`,'pct')}</td>`).join('')}<td class="r ${r.npv<0?'neg':''}">${fnum(r.npv)}</td><td class="r">${r.irr===null?'-':pct(r.irr)}</td><td class="r">${pct(r.opm5)}</td><td class="r">${yr(r.pb)}</td><td><span class="chip ${v.c}">${v.l.split(' ')[0]}</span></td><td class="act"><button class="ib del" data-delsc="${i}">✕</button></td></tr>`}).join('');
+ const fo=document.activeElement;const keep=fo&&fo.dataset&&fo.dataset.path&&fo.dataset.path.startsWith('scen.')?fo.dataset.path:null;const pos=keep?fo.selectionStart:0;
+ $('#scTbl').innerHTML=`<thead><tr><th style="min-width:230px">시나리오</th><th>단가(%)</th><th>대수(%)</th><th>재료비(%)</th><th>투자(%)</th><th>NPV(원)</th><th>IRR</th><th>평균이익률</th><th>회수기간</th><th>판정</th><th></th></tr></thead><tbody>${rows}</tbody>`;
+ if(keep){const e=$(`[data-path="${keep}"]`);if(e){e.focus();try{e.setSelectionRange(pos,pos)}catch(x){}}}}
+
+/* ===== 툴팁 ===== */
+let tipEl,tipTarget,tipHide;
+function showTip(el){const key=el.dataset.tip;const T=TIPS[key];if(!T)return;clearTimeout(tipHide);tipTarget=el;
+ const inpEl=el.matches('.in')?el:(el.closest('.fld')?.querySelector('.in'))||null;const path=inpEl?inpEl.dataset.path:null;
+ let chips='';if(T.chips&&path){chips='<div class="tchips">'+T.chips.map(c=>`<button data-chip="${esc(String(c[1]))}" data-cp="${path}">${esc(c[0])}</button>`).join('')+'</div>'}
+ tipEl.innerHTML=`<div class="tt">${T.t}</div><div class="td">${T.d}</div>${T.r?`<div class="tr"><b>참고 수치</b> ${T.r}</div>`:''}${T.e?`<div class="te"><b>입력 예</b> ${T.e}</div>`:''}${chips}<div class="tf">${DISC}</div>`;
+ tipEl.style.display='block';const r=el.getBoundingClientRect(),tw=tipEl.offsetWidth,th=tipEl.offsetHeight;let x=Math.min(Math.max(8,r.left),window.innerWidth-tw-8),y=r.bottom+6;if(y+th>window.innerHeight-8)y=Math.max(8,r.top-th-6);tipEl.style.left=x+'px';tipEl.style.top=y+'px'}
+function hideTip(){tipHide=setTimeout(()=>{tipEl.style.display='none';tipTarget=null},180)}
+function applyChip(btn){const path=btn.dataset.cp;let v=btn.dataset.chip;if(v==='@req'){if(R.req===null)return;v=Math.round(R.req/10000)*10000}else v=parseFloat(v);
+ const el=$(`[data-path="${path}"]`);const kind=el?el.dataset.kind:'num';setP(S,path,v);if(el)el.value=dispVal(kind,v);update();el&&el.focus()}
+
+/* ===== 이벤트 ===== */
+document.addEventListener('input',e=>{const el=e.target;if(el.matches('[data-path]')&&el.tagName==='INPUT'){const kind=el.dataset.kind;const raw=el.value;if(kind!=='text'&&/[^0-9.,\-]/.test(raw)){el.value=raw.replace(/[^0-9.,\-]/g,'')}setP(S,el.dataset.path,parseVal(kind,el.value));update()}
+ else if(el.matches('[data-adj]')){S.adj[el.dataset.adj]=parseFloat(el.value);update()}});
+document.addEventListener('change',e=>{const el=e.target;if(el.id==='syncTg'){TEAM.syncOn=el.checked;if(el.checked){if(TEAM.remoteNewer)applyRemote(TEAM.remoteNewer);else teamPush()}teamUI();return}if(el.matches('select[data-path]')){setP(S,el.dataset.path,el.value);update()}});
+document.addEventListener('focusout',e=>{const el=e.target;if(el.matches&&el.matches('input[data-path]')&&el.dataset.kind!=='text'){el.value=dispVal(el.dataset.kind,getP(S,el.dataset.path))}if(el.dataset&&el.dataset.tip)hideTip()});
+document.addEventListener('focusin',e=>{if(e.target.dataset&&e.target.dataset.tip)showTip(e.target)});
+document.addEventListener('mouseover',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t&&t!==tipTarget)showTip(t);else if(e.target.closest&&e.target.closest('#tip'))clearTimeout(tipHide)});
+document.addEventListener('mouseout',e=>{const t=e.target.closest&&e.target.closest('[data-tip],#tip');if(t&&!(e.relatedTarget&&e.relatedTarget.closest&&e.relatedTarget.closest('[data-tip],#tip')))hideTip()});
+document.addEventListener('mousedown',e=>{const b=e.target.closest&&e.target.closest('[data-chip]');if(b){e.preventDefault();applyChip(b)}});
+document.addEventListener('click',e=>{const t=e.target;
+ const tab=t.closest('[data-tab]');if(tab){TAB=tab.dataset.tab;buildNav();view();return}
+ const add=t.closest('[data-add]');if(add){S[add.dataset.add].push(TBL[add.dataset.add].blank());view(1);return}
+ const del=t.closest('[data-del]');if(del){const [k,i]=del.dataset.del.split('.');S[k].splice(+i,1);if(!S[k].length)S[k].push(TBL[k].blank());view(1);return}
+ const dup=t.closest('[data-dup]');if(dup){const [k,i]=dup.dataset.dup.split('.');S[k].splice(+i+1,0,clone(S[k][+i]));view(1);return}
+ const sc=t.closest('[data-sc]');if(sc){const m={pess:{price:-.05,vol:-.2,mat:.05,inv:.1},opt:{price:.05,vol:.2,mat:-.05,inv:-.1},zero:{price:0,vol:0,mat:0,inv:0}}[sc.dataset.sc];S.adj={...m};view(1);return}
+ const asc=t.closest('[data-addsc]');if(asc){S.scen.push({name:'새 시나리오',p:0,v:0,m:0,i:0});view(1);return}
+ const dsc=t.closest('[data-delsc]');if(dsc){S.scen.splice(+dsc.dataset.delsc,1);view(1);return}
+ if(t.closest('#btnPrint')||t.closest('#btnPrint2'))doPrint();
+ if(t.closest('#btnExport'))exportModal();
+ if(t.closest('#btnImport'))importModal();
+ if(t.closest('#btnNew')){if(confirm0('현재 입력 내용이 사라지고 선택한 예시로 바뀝니다.'))loadPreset($('#preset').value)}
+ if(t.closest('.mclose')||t.classList.contains('mback'))closeModal();
+ if(t.closest('#btnRv'))saveReview();if(t.closest('#btnRvDel'))delReview();if(t.closest('#btnSn'))saveSnapshot();if(t.closest('#btnStart'))startShare();
+ if(t.closest('#btnPull')&&TEAM.remoteNewer){TEAM.syncOn=true;applyRemote(TEAM.remoteNewer)}
+ const rs=t.closest('[data-rs]');if(rs)restoreSnapshot(rs.dataset.rs);
+ const mc=t.closest('#mCopy');if(mc)copyJSON();
+ const ma=t.closest('#mApply');if(ma)applyImport();
+ const mdl=t.closest('#mDl');if(mdl)dlJSON();
+});
+const confirm0=()=>true;
+function loadPreset(k){S=({staria:presetStaria,pv7:presetPV7,part:presetPart,blank:presetBlank})[k]();TAB='dash';buildNav();view()}
+function buildNav(){const hideTeam=/github\.io$/.test(location.hostname);$('#nav').innerHTML=TABS.filter(t=>!(hideTeam&&t[0]==='team')).map(([k,l])=>`<button class="tab${TAB===k?' on':''}" data-tab="${k}">${l}<span class="dot" style="display:none"></span></button>`).join('')}
+function doPrint(){try{window.print()}catch(e){}openModal('인쇄 안내',`<p>인쇄 창이 열리지 않았다면 <b>Ctrl+P</b>(Mac은 ⌘P)를 누르세요. 현재 보고 계신 화면이 인쇄됩니다.</p><p>경영자 보고용으로는 상단 탭 <b>"🖨 보고서·인쇄"</b>에서 인쇄하는 것이 가장 깔끔합니다 (A4 세로, 2쪽 내외). 대상 프린터에서 <b>"PDF로 저장"</b>을 고르면 PDF 파일이 됩니다.</p>`)}
+function openModal(t,h){$('#modal').innerHTML=`<div class="mback"><div class="mbox"><div class="mh"><b>${t}</b><button class="ib mclose">✕</button></div><div class="mb">${h}</div></div></div>`;$('#modal').style.display='block'}
+function closeModal(){$('#modal').style.display='none';$('#modal').innerHTML=''}
+function exportModal(){openModal('저장 (내보내기)',`<p>아래 내용을 복사해 메모장 등에 저장해 두면, 나중에 "불러오기"로 그대로 복원됩니다. (이 화면은 브라우저에도 자동 저장되지만, 다른 PC/기기로 옮기려면 이 방법을 쓰세요.)</p><textarea id="mTa" class="ta" readonly>${esc(JSON.stringify(S))}</textarea><div class="btns"><button class="btn pri" id="mCopy">복사</button><button class="btn" id="mDl">파일로 저장(.json)</button><span id="mMsg" class="sub"></span></div>`)}
+function importModal(){openModal('불러오기',`<p>저장해 둔 내용을 붙여넣거나 파일을 선택하세요.</p><textarea id="mTa" class="ta" placeholder="여기에 붙여넣기"></textarea><div class="btns"><input type="file" id="mFile" accept=".json,application/json"><button class="btn pri" id="mApply">적용</button><span id="mMsg" class="sub"></span></div>`);$('#mFile').onchange=ev=>{const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('#mTa').value=r.result};r.readAsText(f)}}
+function copyJSON(){const ta=$('#mTa');ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}try{navigator.clipboard.writeText(ta.value);ok=true}catch(e){}$('#mMsg').textContent=ok?'복사되었습니다':'선택된 내용을 Ctrl+C로 복사하세요'}
+async function dlJSON(){try{if(window.claude&&claude.use){const d=await claude.use('downloads');if(d){await d.save({filename:(S.meta.name||'project')+'.json',data:$('#mTa').value});$('#mMsg').textContent='저장 요청을 보냈습니다.';return}}}catch(e){if(e&&e.code==='declined'){return}}try{const b=new Blob([$('#mTa').value],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(S.meta.name||'project')+'.json';document.body.appendChild(a);a.click();a.remove();$('#mMsg').textContent='파일 저장을 시도했습니다. 안 되면 "복사"를 이용하세요.'}catch(e){$('#mMsg').textContent='이 환경에서는 파일 저장이 막혀 있습니다. "복사"를 이용하세요.'}}
+function applyImport(){try{const o=JSON.parse($('#mTa').value);if(!o.base||!o.bom)throw 0;S=o;if(!S.scen)S.scen=defaultScen();closeModal();TAB='dash';buildNav();view()}catch(e){$('#mMsg').textContent='형식이 올바르지 않습니다.'}}
+/* ===== 시작 ===== */
+function init(){tipEl=$('#tip');buildNav();view();teamInit()}
+document.addEventListener('DOMContentLoaded',init);
+/* ===== 팀 협업 (공유 데이터 · 검토 의견 · 버전) ===== */
+const TEAM={db:null,user:null,myId:null,exists:false,ready:false,syncOn:true,lastJson:'',pending:null,writing:false,t:null,meta:null,reviews:[],snaps:[],names:{},err:null,readOnly:false,remoteNewer:null,toast:''};
+const STANCE={go:['추진 찬성','go'],cond:['조건부','cond'],nogo:['반대','nogo']};
+function shareable(){const o=clone(S);delete o.adj;return o}
+async function teamInit(){
+ if(!(window.claude&&window.claude.use))return;
+ try{TEAM.user=await claude.use('user');TEAM.db=await claude.use('db')}catch(e){}
+ if(!TEAM.db){return}
+ try{TEAM.myId=TEAM.user?await TEAM.user.id():null}catch(e){}
+ try{TEAM.canWrite=TEAM.user&&TEAM.user.can?await TEAM.user.can('data.write'):null}catch(e){}
+ if(TEAM.canWrite===false)TEAM.readOnly=true;
+ const fail=e=>{TEAM.err=(e&&e.code)||'unavailable';teamUI()};
+ try{
+  TEAM.projRef=TEAM.db.doc('shared/project');
+  TEAM.projRef.onSnapshot(onProj,fail);
+  TEAM.db.collection('reviews').onSnapshot(s=>{TEAM.reviews=s.docs.map(d=>({id:d.id,...d.data()}));namesThen(renderTeamParts)},fail);
+  TEAM.db.collection('snapshots').orderBy('at','desc').limit(20).onSnapshot(s=>{TEAM.snaps=s.docs.map(d=>({id:d.id,...d.data()}));namesThen(renderTeamParts)},fail);
+ }catch(e){fail(e)}
+ teamUI();
+}
+async function namesThen(fn){
+ try{const ids=[...new Set([...TEAM.reviews.map(r=>r.id),...TEAM.snaps.map(r=>r.by),TEAM.meta&&TEAM.meta.by].filter(Boolean))];
+  if(ids.length&&TEAM.user&&TEAM.user.profiles){const ps=await TEAM.user.profiles(ids);ids.forEach(i=>{TEAM.names[i]=(ps[i]&&ps[i].name)||''})}}catch(e){}
+ fn();update_top()}
+const nm=id=>id===TEAM.myId?(TEAM.names[id]||'나')+(TEAM.names[id]?' (나)':''):(TEAM.names[id]||'팀원');
+function onProj(snap){
+ TEAM.ready=true;TEAM.exists=snap.exists;TEAM.err=null;
+ if(!snap.exists){teamUI();return}
+ const d=snap.data();TEAM.meta={by:d.by,at:d.at};
+ if(d.json===TEAM.lastJson){teamUI();namesThen(()=>{});return}
+ if(!TEAM.syncOn){TEAM.remoteNewer=d.json;teamUI();return}
+ applyRemote(d.json);namesThen(()=>{teamUI()})}
+function applyRemote(json){
+ const a=document.activeElement;
+ if(a&&a.matches&&a.matches('input[data-path],textarea,select[data-path]')){TEAM.pending=json;return}
+ try{const o=JSON.parse(json);if(!o.base||!o.bom)return;o.adj=S.adj;if(!o.scen)o.scen=defaultScen();S=o;TEAM.lastJson=JSON.stringify(shareable());TEAM.pending=null;TEAM.remoteNewer=null;toast('팀원의 수정 내용이 반영되었습니다');view(1)}catch(e){}}
+document.addEventListener('focusout',()=>{setTimeout(()=>{if(TEAM.pending&&!(document.activeElement&&document.activeElement.matches&&document.activeElement.matches('input[data-path],textarea')))applyRemote(TEAM.pending)},300)});
+function teamPush(){
+ if(!TEAM.db||!TEAM.exists||!TEAM.syncOn||TEAM.readOnly)return;
+ if(JSON.stringify(shareable())===TEAM.lastJson)return;
+ clearTimeout(TEAM.t);TEAM.t=setTimeout(doPush,1200)}
+async function doPush(force){
+ if(TEAM.writing){TEAM.t=setTimeout(doPush,600);return}
+ const j=JSON.stringify(shareable());if(j===TEAM.lastJson&&!force)return;
+ const prev=TEAM.lastJson;TEAM.writing=true;TEAM.lastJson=j;
+ try{await TEAM.projRef.set({json:j,by:TEAM.myId||'',at:new Date().toISOString()});TEAM.err=null;TEAM.exists=true}
+ catch(e){TEAM.lastJson=prev;TEAM.err=(e&&e.code)||'unavailable';if(TEAM.err==='invalid_argument')TEAM.readOnly=true}
+ TEAM.writing=false;teamUI()}
+async function startShare(){await doPush(true);toast('팀 공유를 시작했습니다. 이제 팀원이 같은 데이터를 봅니다.')}
+async function saveSnapshot(){const name=($('#snName').value||'').trim()||('버전 '+new Date().toLocaleString('ko-KR'));
+ try{await TEAM.db.collection('snapshots').add({name,json:JSON.stringify(shareable()),by:TEAM.myId||'',at:new Date().toISOString(),npv:Math.round(R.npv),verdict:R.verdict,price:num(S.base.price)});$('#snName').value='';toast('버전을 저장했습니다')}catch(e){toast('저장 실패: 권한(편집자/기여자)이 필요합니다')}}
+function restoreSnapshot(id){const s=TEAM.snaps.find(x=>x.id===id);if(!s)return;try{const o=JSON.parse(s.json);o.adj=S.adj;S=o;view(1);toast('"'+s.name+'" 버전을 불러왔습니다');if(TEAM.syncOn&&TEAM.exists)teamPush()}catch(e){}}
+async function saveReview(){
+ if(!TEAM.db||!TEAM.myId){toast('로그인 상태에서만 저장됩니다');return}
+ const st=(document.querySelector('input[name=stance]:checked')||{}).value;if(!st){toast('의견(추진/조건부/반대)을 선택하세요');return}
+ try{await TEAM.db.doc('reviews/'+TEAM.myId).set({stance:st,comment:($('#rvText').value||'').slice(0,2000),at:new Date().toISOString(),verdict:R.verdict,npv:Math.round(R.npv),cnt:R.cnt});toast('검토 의견을 저장했습니다')}catch(e){toast('저장 실패: 기여자(Contributor) 이상 권한이 필요합니다')}}
+async function delReview(){try{await TEAM.db.doc('reviews/'+TEAM.myId).delete();toast('내 의견을 삭제했습니다')}catch(e){}}
+let toastT;function toast(m){let t=$('#toast');if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t)}t.textContent=m;t.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>t.style.display='none',3200)}
+/* --- 화면 --- */
+const tsx=iso=>{try{return new Date(iso).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}catch(e){return ''}};
+function teamHTML(){const my=TEAM.reviews.find(r=>r.id===TEAM.myId)||{};
+ return `<div class="help"><b>팀 검토</b> — 같은 데이터를 팀원이 함께 보고, 각자 의견을 남깁니다.<br><span>① 한 사람이 "공유 시작"을 누르면 입력 내용이 팀 공유 저장소에 올라갑니다 ② 팀원은 이 페이지를 열기만 하면 같은 데이터가 보이고, 수정하면 모두에게 반영됩니다 ③ 각자 <b>검토 의견</b>을 남기면 아래에 모아서 보입니다. 동시에 같은 칸을 수정하면 마지막 저장이 우선되니, 큰 수정 전에는 "버전 저장"을 해 두세요.</span></div>
+ <div class="card"><div class="ch"><h3>공유 상태</h3></div><div id="tmStatus"></div></div>
+ <div class="grid2"><div class="card"><div class="ch"><h3>내 검토 의견</h3><span class="sub">현재 판정: ${VERD[R.verdict].l}</span></div>
+  <div class="stances">${Object.entries(STANCE).map(([k,[l]])=>`<label class="st st-${k}"><input type="radio" name="stance" value="${k}"${my.stance===k?' checked':''}> ${l}</label>`).join('')}</div>
+  <textarea id="rvText" class="ta" style="height:110px" placeholder="검토 의견·우려사항·확인이 필요한 가정을 적어 주세요 (예: 기반차량 매입가 협상 근거 필요)">${esc(my.comment||'')}</textarea>
+  <div class="btns" style="margin-top:6px"><button class="btn pri" id="btnRv">의견 저장</button><button class="btn sm" id="btnRvDel">내 의견 삭제</button></div></div>
+ <div class="card"><div class="ch"><h3>팀 검토 현황</h3><span class="sub">검토 대상 인원 <input class="in r" style="width:46px;display:inline-block" type="text" data-path="meta.teamSize" data-kind="num" value="${S.meta.teamSize||4}">명</span></div><div id="tmTally"></div></div></div>
+ <div class="card"><div class="ch"><h3>검토 의견 모음</h3></div><div id="tmReviews"></div></div>
+ <div class="card"><div class="ch"><h3>버전 저장 / 복원</h3><span class="sub">큰 수정 전후로 저장해 두면 되돌릴 수 있습니다</span></div>
+  <div class="btns" style="margin:0 0 8px"><input id="snName" class="in" style="max-width:300px" type="text" placeholder="버전 이름 (예: 협력사 견적 반영 전)"><button class="btn pri" id="btnSn">현재 내용 저장</button></div><div id="tmSnaps"></div></div>`}
+function teamUI(){const el=$('#tmStatus');update_top();if(!el)return;let h='';
+ if(!TEAM.db)h='<div class="warn">팀 기능이 꺼져 있습니다. 이 파일을 단독으로 열었거나 로그인되지 않은 상태입니다. <b>claude.ai의 게시 페이지(공유 링크)</b>에서 열어야 팀 공유·검토 의견이 작동합니다.</div>';
+ else{
+  if(TEAM.err)h+=`<div class="warn">연결 문제가 있습니다 (${esc(TEAM.err)}). ${TEAM.readOnly?'':'잠시 후 다시 시도됩니다.'}</div>`;
+  if(TEAM.readOnly)h+='<div class="warn">현재 계정은 <b>보기 전용</b> 권한입니다. 수정·의견 저장이 되지 않습니다. 소유자가 공유 메뉴에서 권한을 <b>기여자(Contributor) 또는 편집자</b>로 올려야 합니다.</div>';
+  if(!TEAM.ready)h+='<div class="sub">공유 저장소에 연결 중…</div>';
+  else if(!TEAM.exists)h+=`<p>아직 팀 공유 데이터가 없습니다. 지금 화면의 입력 내용을 올려서 <b>팀 공유를 시작</b>할까요?</p><button class="btn pri" id="btnStart"${TEAM.readOnly?' disabled':''}>현재 내용으로 팀 공유 시작</button>`;
+  else h+=`<p><span class="chip go">팀 공유 중</span> 마지막 수정: <b>${esc(nm(TEAM.meta&&TEAM.meta.by))}</b> · ${tsx(TEAM.meta&&TEAM.meta.at)} ${TEAM.writing?'<span class="sub">(저장 중…)</span>':''}</p>
+   <label class="sw"><input type="checkbox" id="syncTg"${TEAM.syncOn?' checked':''}> 팀 동기화 켜기 <span class="sub">(끄면 이 화면에서만 실험하고 팀 데이터는 바뀌지 않습니다)</span></label>
+   ${TEAM.remoteNewer?'<div class="warn">동기화가 꺼진 동안 팀 데이터가 바뀌었습니다. <button class="btn sm" id="btnPull">팀 최신 내용 불러오기</button></div>':''}`}
+ el.innerHTML=h}
+function update_top(){const c=$('#teamChip');if(!c)return;if(!TEAM.db){c.innerHTML='';return}const n=TEAM.reviews.length,t=num(S.meta.teamSize)||4;c.innerHTML=`<span class="chip ${TEAM.exists?'go':'warnc'}" data-tab="team" style="cursor:pointer">👥 ${TEAM.exists?'팀 공유 중':'공유 전'} · 검토 ${n}/${t}</span>`}
+function renderTeamParts(){
+ const t=num(S.meta.teamSize)||4;const cnt={go:0,cond:0,nogo:0};TEAM.reviews.forEach(r=>{if(cnt[r.stance]!==undefined)cnt[r.stance]++});
+ const ty=$('#tmTally');if(ty)ty.innerHTML=`<div class="kpis"><div class="kpi"><div class="kl">검토 완료</div><div class="kv">${TEAM.reviews.length} / ${t}</div><div class="ks">미검토 ${Math.max(0,t-TEAM.reviews.length)}명</div></div><div class="kpi"><div class="kl">찬성</div><div class="kv" style="color:#1E7B3A">${cnt.go}</div></div><div class="kpi"><div class="kl">조건부</div><div class="kv" style="color:#8A5A00">${cnt.cond}</div></div><div class="kpi"><div class="kl">반대</div><div class="kv" style="color:#B3261E">${cnt.nogo}</div></div></div>`;
+ const rv=$('#tmReviews');if(rv)rv.innerHTML=reviewsHTML();
+ const sn=$('#tmSnaps');if(sn)sn.innerHTML=TEAM.snaps.length?`<table class="tb"><thead><tr><th>이름</th><th>저장자</th><th>시각</th><th>판정</th><th>NPV</th><th></th></tr></thead><tbody>${TEAM.snaps.map(s=>`<tr><td>${esc(s.name)}</td><td>${esc(nm(s.by))}</td><td>${tsx(s.at)}</td><td><span class="chip ${(VERD[s.verdict]||{}).c}">${((VERD[s.verdict]||{l:'-'}).l).split(' ')[0]}</span></td><td class="r">${krw(s.npv)}</td><td><button class="btn sm" data-rs="${s.id}">불러오기</button></td></tr>`).join('')}</tbody></table>`:'<div class="sub">저장된 버전이 없습니다.</div>';
+ if(TAB==='report'&&$('#r_rev'))$('#r_rev').innerHTML=reviewsHTML(true)}
+function reviewsHTML(rep){if(!TEAM.reviews.length)return '<div class="sub">아직 등록된 검토 의견이 없습니다.</div>';
+ return TEAM.reviews.slice().sort((a,b)=>(a.at||'')<(b.at||'')?1:-1).map(r=>{const st=STANCE[r.stance]||['-',''];const stale=(r.npv!==undefined&&Math.round(R.npv)!==r.npv)?'<span class="tag bad">검토 이후 수치 변경됨</span>':'';
+  return `<div class="rvi"><div class="rvh"><span class="chip ${st[1]}">${st[0]}</span> <b>${esc(nm(r.id))}</b> <span class="sub">${tsx(r.at)} · 검토 시점 판정 ${(VERD[r.verdict]||{l:'-'}).l}, NPV ${krw(r.npv)}</span> ${stale}</div><div class="rvc2">${esc(r.comment||'(의견 없음)').replace(/\n/g,'<br>')}</div></div>`}).join('')}
+</script></body></html>
